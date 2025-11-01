@@ -38,7 +38,7 @@ export default function Login() {
       setShowError(false);
       await login(data.email, data.password);
       toast.success('Welcome back!');
-      navigate('/dashboard');
+      navigate('/welcome');
     } catch (err) {
       setShowError(true);
     }

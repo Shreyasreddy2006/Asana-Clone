@@ -7,6 +7,8 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import Welcome from "./pages/Welcome";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -22,6 +24,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/onboarding" element={<Onboarding />} />
           <Route
             path="/dashboard"
             element={

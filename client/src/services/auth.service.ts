@@ -32,13 +32,43 @@ export const authService = {
   // Register new user
   register: async (data: RegisterData): Promise<AuthResponse> => {
     const response = await api.post('/auth/register', data);
-    return response.data;
+    // Transform server response to match AuthResponse interface
+    const { data: userData } = response.data;
+    return {
+      success: response.data.success,
+      token: userData.token,
+      user: {
+        _id: userData._id,
+        name: userData.name,
+        email: userData.email,
+        avatar: userData.avatar,
+        role: userData.role || 'user',
+        workspaces: userData.workspaces || [],
+        teams: userData.teams || [],
+        createdAt: userData.createdAt || new Date().toISOString(),
+      },
+    };
   },
 
   // Login user
   login: async (data: LoginData): Promise<AuthResponse> => {
     const response = await api.post('/auth/login', data);
-    return response.data;
+    // Transform server response to match AuthResponse interface
+    const { data: userData } = response.data;
+    return {
+      success: response.data.success,
+      token: userData.token,
+      user: {
+        _id: userData._id,
+        name: userData.name,
+        email: userData.email,
+        avatar: userData.avatar,
+        role: userData.role || 'user',
+        workspaces: userData.workspaces || [],
+        teams: userData.teams || [],
+        createdAt: userData.createdAt || new Date().toISOString(),
+      },
+    };
   },
 
   // Get current user
