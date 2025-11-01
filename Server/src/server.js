@@ -16,10 +16,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Enable CORS
-app.use(cors({
-  origin: 'http://localhost:8080',
-  credentials: true
-}));
+const clientUrl = process.env.CLIENT_URL;
+app.use(
+  cors({
+    origin: clientUrl,
+    credentials: true
+  })
+);
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -45,10 +48,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = 8765;
+const PORT = process.env.PORT || 8765;
 
 const server = app.listen(PORT, () => {
-  console.log(`Server running in development mode on port ${PORT}`);
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
 
 // Handle unhandled promise rejections

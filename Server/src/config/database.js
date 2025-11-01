@@ -2,7 +2,12 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect("mongodb+srv://AsanaClone:Asana%40bhh@cluster-1.9tymipy.mongodb.net/?appName=Cluster-1", {
+    const mongoUri = process.env.MONGO_URI;
+    if (!mongoUri) {
+      throw new Error('MONGO_URI is not defined in environment variables');
+    }
+
+    const conn = await mongoose.connect(mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });

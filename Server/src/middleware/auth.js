@@ -15,9 +15,12 @@ exports.protect = async (req, res, next) => {
       message: 'Not authorized to access this route'
     });
   }
-
+  const jwt_key = process.env.JWT_SECRET;
   try {
-    const decoded = jwt.verify(token, "asana_clone_super_secret_jwt_key_change_in_production_2024");
+    if (!jwt_key) {
+      throw new Error('JWT_SECRET is not defined in environment variables');
+    }
+    const decoded = jwt.verify(token, jwt_key);
     req.user = await User.findById(decoded.id);
     next();
   } catch (error) {
