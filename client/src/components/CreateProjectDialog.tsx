@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import WorkflowGallery from '@/pages/WorkflowGallery';
 
 const projectSchema = z.object({
   name: z.string().min(1, 'Project name is required'),
@@ -45,6 +46,8 @@ export default function CreateProjectDialog({ open, onOpenChange }: CreateProjec
   const { createProject, isLoading } = useProjectStore();
   const { currentWorkspace } = useWorkspaceStore();
   const [selectedColor, setSelectedColor] = useState('#4573D2');
+  const [showWorkflowGallery, setShowWorkflowGallery] = useState(true);
+  const [showBlankProjectForm, setShowBlankProjectForm] = useState(false);
 
   const {
     register,
@@ -106,106 +109,133 @@ export default function CreateProjectDialog({ open, onOpenChange }: CreateProjec
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[525px]">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
-            <DialogDescription>
-              Create a new project to organize your tasks and collaborate with your team.
-            </DialogDescription>
-          </DialogHeader>
+  const handleClose = () => {
+    setShowWorkflowGallery(true);
+    setShowBlankProjectForm(false);
+    reset();
+    onOpenChange(false);
+  };
 
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Project Name *</Label>
-              <Input
-                id="name"
-                placeholder="e.g. Website Redesign"
-                {...register('name')}
-                className={errors.name ? 'border-red-500' : ''}
-              />
-              {errors.name && (
-                <p className="text-sm text-red-500">{errors.name.message}</p>
-              )}
-            </div>
+  const handleBlankProject = () => {
+    setShowWorkflowGallery(false);
+    setShowBlankProjectForm(true);
+  };
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="What is this project about?"
-                {...register('description')}
-                rows={3}
-              />
-            </div>
+  // Show workflow gallery as full-screen overlay
+  if (open && showWorkflowGallery) {
+    return (
+      <WorkflowGallery
+        onClose={handleClose}
+        onCreateBlankProject={handleBlankProject}
+      />
+    );
+  }
 
-            <div className="space-y-2">
-              <Label>Default View</Label>
-              <Select
-                value={selectedView}
-                onValueChange={(value) => setValue('view', value as any)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="list">List</SelectItem>
-                  <SelectItem value="board">Board</SelectItem>
-                  <SelectItem value="timeline">Timeline</SelectItem>
-                  <SelectItem value="calendar">Calendar</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+  // Show blank project form in dialog
+  if (open && showBlankProjectForm) {
+    return (
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-[525px]">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <DialogHeader>
+              <DialogTitle>Create Blank Project</DialogTitle>
+              <DialogDescription>
+                Create a new project to organize your tasks and collaborate with your team.
+              </DialogDescription>
+            </DialogHeader>
 
-            <div className="space-y-2">
-              <Label>Project Color</Label>
-              <div className="flex gap-2 flex-wrap">
-                {colors.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => {
-                      setSelectedColor(color);
-                      setValue('color', color);
-                    }}
-                    className={`w-10 h-10 rounded-lg transition-all ${
-                      selectedColor === color
-                        ? 'ring-2 ring-offset-2 ring-primary scale-110'
-                        : 'hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Project Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="e.g. Website Redesign"
+                  {...register('name')}
+                  className={errors.name ? 'border-red-500' : ''}
+                />
+                {errors.name && (
+                  <p className="text-sm text-red-500">{errors.name.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="What is this project about?"
+                  {...register('description')}
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Default View</Label>
+                <Select
+                  value={selectedView}
+                  onValueChange={(value) => setValue('view', value as any)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="list">List</SelectItem>
+                    <SelectItem value="board">Board</SelectItem>
+                    <SelectItem value="timeline">Timeline</SelectItem>
+                    <SelectItem value="calendar">Calendar</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Project Color</Label>
+                <div className="flex gap-2 flex-wrap">
+                  {colors.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => {
+                        setSelectedColor(color);
+                        setValue('color', color);
+                      }}
+                      className={`w-10 h-10 rounded-lg transition-all ${
+                        selectedColor === color
+                          ? 'ring-2 ring-offset-2 ring-primary scale-110'
+                          : 'hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                reset();
-                onOpenChange(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                'Create Project'
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowBlankProjectForm(false);
+                  setShowWorkflowGallery(true);
+                }}
+              >
+                Back
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Project'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return null;
 }
