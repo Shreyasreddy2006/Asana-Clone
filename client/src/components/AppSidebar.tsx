@@ -31,56 +31,56 @@ export function AppSidebar() {
     <>
       <aside className="w-60 bg-neutral-900 border-r border-neutral-800 flex flex-col h-screen fixed left-0 top-0 z-20">
         {/* Hamburger menu */}
-        <div className="p-4 border-b border-neutral-800">
-          <button className="p-2 hover:bg-neutral-800 rounded text-neutral-400 hover:text-white">
+        <div className="p-3 border-b border-neutral-800/50">
+          <button className="p-1.5 hover:bg-neutral-800/50 rounded text-neutral-400 hover:text-white transition-colors">
             <Menu className="w-5 h-5" />
           </button>
         </div>
 
         {/* Create button */}
-        <div className="p-4">
+        <div className="px-3 pt-3 pb-2">
           <Button
             onClick={() => setIsCreateProjectOpen(true)}
-            className="w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white rounded-md px-4 py-2 font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 text-white rounded-md px-4 py-2.5 text-sm font-medium transition-colors"
           >
             <Plus className="w-4 h-4" />
             <span>Create</span>
           </Button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-2 pb-4">
+        <nav className="flex-1 overflow-y-auto px-2 py-1">
           {/* Main Navigation */}
-          <div className="mb-6">
+          <div className="space-y-0.5 mb-4">
             {navigationItems.map((item) => (
               <button
                 key={item.title}
                 onClick={() => navigate(item.url)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors w-full ${
+                className={`flex items-center gap-3 px-2 py-1.5 rounded text-sm transition-colors w-full text-left ${
                   isActive(item.url)
-                    ? "bg-neutral-800 text-white"
-                    : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                    ? "bg-neutral-800 text-white font-normal"
+                    : "text-neutral-300 hover:bg-neutral-800/50 hover:text-white"
                 }`}
               >
-                <item.icon className="w-4 h-4" />
+                <item.icon className="w-4 h-4 flex-shrink-0" />
                 <span>{item.title}</span>
               </button>
             ))}
           </div>
 
           {/* Insights Section */}
-          <div className="mb-6">
-            <button className="flex items-center gap-2 px-3 py-2 w-full text-left text-sm font-medium text-neutral-400 hover:text-white">
-              <ChevronDown className="w-3 h-3" />
+          <div className="mb-4">
+            <div className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-neutral-500 uppercase tracking-wide">
+              <Plus className="w-3 h-3" />
               <span>Insights</span>
-            </button>
-            <div className="ml-2">
+            </div>
+            <div className="space-y-0.5">
               {insightsItems.map((item) => (
                 <button
                   key={item.title}
                   onClick={() => navigate(item.url)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors w-full"
+                  className="flex items-center gap-3 px-2 py-1.5 rounded text-sm text-neutral-300 hover:bg-neutral-800/50 hover:text-white transition-colors w-full text-left"
                 >
-                  <item.icon className="w-4 h-4" />
+                  <item.icon className="w-4 h-4 flex-shrink-0" />
                   <span>{item.title}</span>
                 </button>
               ))}
@@ -88,45 +88,46 @@ export function AppSidebar() {
           </div>
 
           {/* Projects Section */}
-          <div className="mb-6">
-            <button className="flex items-center gap-2 px-3 py-2 w-full text-left text-sm font-medium text-neutral-400 hover:text-white">
-              <ChevronDown className="w-3 h-3" />
+          <div className="mb-4">
+            <div className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-neutral-500 uppercase tracking-wide">
+              <Plus className="w-3 h-3" />
               <span>Projects</span>
-            </button>
-            <div className="ml-2">
+            </div>
+            <div className="space-y-0.5">
               {projects && projects.length > 0 ? (
                 projects.map((project) => (
                   <button
                     key={project._id}
                     onClick={() => navigate(`/projects/${project._id}`)}
-                    className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors w-full"
+                    className="flex items-center gap-3 px-2 py-1.5 rounded text-sm text-neutral-300 hover:bg-neutral-800/50 hover:text-white transition-colors w-full text-left"
                   >
                     <div
-                      className="w-2 h-2 rounded-full"
+                      className="w-2 h-2 rounded-sm flex-shrink-0"
                       style={{ backgroundColor: project.color || '#06b6d4' }}
                     />
                     <span className="truncate">{project.name}</span>
                   </button>
                 ))
               ) : (
-                <p className="px-3 py-2 text-xs text-neutral-500">No projects yet</p>
+                <p className="px-2 py-1.5 text-xs text-neutral-500">No projects yet</p>
               )}
             </div>
           </div>
 
           {/* Team Section */}
-          <div className="mb-6">
-            <button className="flex items-center gap-2 px-3 py-2 w-full text-left text-sm font-medium text-neutral-400 hover:text-white">
-              <ChevronRight className="w-3 h-3" />
+          <div className="mb-4">
+            <div className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-neutral-500 uppercase tracking-wide">
+              <Plus className="w-3 h-3" />
               <span>Team</span>
-            </button>
-            <div className="ml-2">
+            </div>
+            <div className="space-y-0.5">
               <button
                 onClick={() => navigate("/workspace")}
-                className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors w-full"
+                className="flex items-center gap-3 px-2 py-1.5 rounded text-sm text-neutral-300 hover:bg-neutral-800/50 hover:text-white transition-colors w-full text-left"
               >
-                <Users className="w-4 h-4" />
+                <Users className="w-4 h-4 flex-shrink-0" />
                 <span>{currentWorkspace?.name || "My workspace"}</span>
+                <ChevronRight className="w-3 h-3 ml-auto text-neutral-500" />
               </button>
             </div>
           </div>
