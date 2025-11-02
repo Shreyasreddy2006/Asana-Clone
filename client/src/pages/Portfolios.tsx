@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppSidebar } from '@/components/AppSidebar';
 import { DashboardHeader } from '@/components/DashboardHeader';
@@ -14,6 +14,17 @@ interface Portfolio {
   privacy: string;
 }
 
+const DEFAULT_PORTFOLIOS: Portfolio[] = [
+  {
+    id: '1',
+    name: 'My first portfolio',
+    color: 'bg-neutral-700',
+    projectCount: 1,
+    defaultView: 'list',
+    privacy: 'Public to My workspace'
+  }
+];
+
 export default function Portfolios() {
   const navigate = useNavigate();
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -21,18 +32,18 @@ export default function Portfolios() {
   const [selectedView, setSelectedView] = useState('list');
   const [privacyOption, setPrivacyOption] = useState('Public to My workspace');
   const [showPrivacyDropdown, setShowPrivacyDropdown] = useState(false);
+  const [activeTab, setActiveTab] = useState<'recent' | 'browse'>('recent');
 
-  // Portfolio list state with default portfolios
-  const [portfolios, setPortfolios] = useState<Portfolio[]>([
-    {
-      id: '1',
-      name: 'My first portfolio',
-      color: 'bg-neutral-700',
-      projectCount: 1,
-      defaultView: 'list',
-      privacy: 'Public to My workspace'
-    }
-  ]);
+  // Portfolio list state with persistence
+  const [portfolios, setPortfolios] = useState<Portfolio[]>(() => {
+    const saved = localStorage.getItem('portfolios');
+    return saved ? JSON.parse(saved) : DEFAULT_PORTFOLIOS;
+  });
+
+  // Save portfolios to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('portfolios', JSON.stringify(portfolios));
+  }, [portfolios]);
 
   // Function to generate random color for portfolio
   const getRandomColor = () => {
@@ -67,16 +78,22 @@ export default function Portfolios() {
       privacy: privacyOption
     };
 
-    setPortfolios([newPortfolio, ...portfolios]);
+    const updatedPortfolios = [newPortfolio, ...portfolios];
+
+    // Update state and localStorage
+    setPortfolios(updatedPortfolios);
+    localStorage.setItem('portfolios', JSON.stringify(updatedPortfolios));
 
     // Reset form and close modal
+    setShowCreateModal(false);
+
+    // Navigate to portfolio setup with portfolio name
+    navigate('/portfolio-setup', { state: { portfolioName: portfolioName } });
+
+    // Reset form after navigation
     setPortfolioName('');
     setSelectedView('list');
     setPrivacyOption('Public to My workspace');
-    setShowCreateModal(false);
-
-    // Navigate to portfolio setup
-    navigate('/portfolio-setup');
   };
 
   return (
@@ -93,10 +110,16 @@ export default function Portfolios() {
 
             {/* Tabs */}
             <div className="flex items-center gap-6 text-sm">
-              <button className="pb-3 border-b-2 border-white font-medium text-white">
+              <button
+                onClick={() => setActiveTab('recent')}
+                className={`pb-3 ${activeTab === 'recent' ? 'border-b-2 border-white font-medium text-white' : 'text-neutral-400 hover:text-white'}`}
+              >
                 Recent and starred
               </button>
-              <button className="pb-3 text-neutral-400 hover:text-white">
+              <button
+                onClick={() => setActiveTab('browse')}
+                className={`pb-3 ${activeTab === 'browse' ? 'border-b-2 border-white font-medium text-white' : 'text-neutral-400 hover:text-white'}`}
+              >
                 Browse all
               </button>
             </div>
@@ -115,51 +138,109 @@ export default function Portfolios() {
 
           {/* Content */}
           <div className="px-8 py-6">
-            {/* Recent Portfolios Section */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-base font-semibold flex items-center gap-2">
-                  <span>▼</span>
-                  Recent portfolios
-                </h2>
-                <button className="p-2 hover:bg-neutral-800 rounded">
-                  <LayoutGrid className="w-5 h-5 text-neutral-400" />
-                </button>
-              </div>
-
-              {/* Portfolio Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {/* New Portfolio Card */}
-                <div
-                  onClick={() => setShowCreateModal(true)}
-                  className="border-2 border-dashed border-neutral-700 rounded-lg p-8 flex flex-col items-center justify-center hover:border-neutral-600 cursor-pointer transition-colors min-h-[180px]"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-neutral-800 flex items-center justify-center mb-3">
-                    <Plus className="w-6 h-6 text-neutral-400" />
-                  </div>
-                  <p className="text-sm text-neutral-300">New portfolio</p>
+            {activeTab === 'recent' ? (
+              /* Recent Portfolios Section - Card View */
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-base font-semibold flex items-center gap-2">
+                    <span>▼</span>
+                    Recent portfolios
+                  </h2>
+                  <button className="p-2 hover:bg-neutral-800 rounded">
+                    <LayoutGrid className="w-5 h-5 text-neutral-400" />
+                  </button>
                 </div>
 
-                {/* Dynamic Portfolio Cards */}
-                {portfolios.map((portfolio) => (
+                {/* Portfolio Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {/* New Portfolio Card */}
                   <div
-                    key={portfolio.id}
-                    onClick={() => navigate('/portfolio-detail')}
-                    className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 hover:bg-neutral-800/50 cursor-pointer transition-colors min-h-[180px] flex flex-col"
+                    onClick={() => setShowCreateModal(true)}
+                    className="border-2 border-dashed border-neutral-700 rounded-lg p-8 flex flex-col items-center justify-center hover:border-neutral-600 cursor-pointer transition-colors min-h-[180px]"
                   >
-                    <div className="flex items-start gap-3 mb-4">
-                      <div className={`w-16 h-16 rounded-lg ${portfolio.color} flex items-center justify-center flex-shrink-0`}>
-                        <FolderKanban className={`w-8 h-8 ${portfolio.color === 'bg-neutral-700' ? 'text-neutral-400' : 'text-white'}`} />
+                    <div className="w-12 h-12 rounded-lg bg-neutral-800 flex items-center justify-center mb-3">
+                      <Plus className="w-6 h-6 text-neutral-400" />
+                    </div>
+                    <p className="text-sm text-neutral-300">New portfolio</p>
+                  </div>
+
+                  {/* Dynamic Portfolio Cards */}
+                  {portfolios.map((portfolio) => (
+                    <div
+                      key={portfolio.id}
+                      onClick={() => navigate('/portfolio-detail', { state: { portfolioName: portfolio.name } })}
+                      className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 hover:bg-neutral-800/50 cursor-pointer transition-colors min-h-[180px] flex flex-col"
+                    >
+                      <div className="flex items-start gap-3 mb-4">
+                        <div className={`w-16 h-16 rounded-lg ${portfolio.color} flex items-center justify-center flex-shrink-0`}>
+                          <FolderKanban className={`w-8 h-8 ${portfolio.color === 'bg-neutral-700' ? 'text-neutral-400' : 'text-white'}`} />
+                        </div>
+                      </div>
+                      <h3 className="text-base font-semibold mb-2">{portfolio.name}</h3>
+                      <p className="text-xs text-neutral-400 mt-auto">
+                        {portfolio.projectCount} {portfolio.projectCount === 1 ? 'project' : 'projects'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              /* Browse All Section - List View */
+              <div className="mb-8">
+                {/* Table Header */}
+                <div className="border-b border-neutral-800">
+                  <div className="grid grid-cols-12 gap-4 px-4 py-3 text-xs text-neutral-400 font-medium">
+                    <div className="col-span-4">Name</div>
+                    <div className="col-span-3">Members</div>
+                    <div className="col-span-3">Parent portfolios</div>
+                    <div className="col-span-2">Last modified</div>
+                  </div>
+                </div>
+
+                {/* Table Rows */}
+                <div className="divide-y divide-neutral-800">
+                  {portfolios.map((portfolio) => (
+                    <div
+                      key={portfolio.id}
+                      onClick={() => navigate('/portfolio-detail', { state: { portfolioName: portfolio.name } })}
+                      className="grid grid-cols-12 gap-4 px-4 py-4 hover:bg-neutral-900 cursor-pointer transition-colors"
+                    >
+                      {/* Name */}
+                      <div className="col-span-4 flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded ${portfolio.color} flex items-center justify-center flex-shrink-0`}>
+                          <FolderKanban className={`w-4 h-4 ${portfolio.color === 'bg-neutral-700' ? 'text-neutral-400' : 'text-white'}`} />
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-white">{portfolio.name}</div>
+                          <div className="text-xs text-neutral-400">
+                            {portfolio.projectCount} {portfolio.projectCount === 1 ? 'project' : 'projects'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Members */}
+                      <div className="col-span-3 flex items-center">
+                        <div className="flex -space-x-2">
+                          <div className="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center text-xs font-bold text-neutral-900 border-2 border-neutral-950">
+                            AY
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Parent portfolios */}
+                      <div className="col-span-3 flex items-center">
+                        <span className="text-sm text-neutral-500">—</span>
+                      </div>
+
+                      {/* Last modified */}
+                      <div className="col-span-2 flex items-center">
+                        <span className="text-sm text-neutral-400">Just now</span>
                       </div>
                     </div>
-                    <h3 className="text-base font-semibold mb-2">{portfolio.name}</h3>
-                    <p className="text-xs text-neutral-400 mt-auto">
-                      {portfolio.projectCount} {portfolio.projectCount === 1 ? 'project' : 'projects'}
-                    </p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Empty State - Hidden when portfolios exist */}
             <div className="hidden flex-col items-center justify-center py-32 px-8">

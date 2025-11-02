@@ -2,8 +2,22 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { Plus, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import AddChartDialog from '@/components/AddChartDialog';
 
 export default function Reporting() {
+  const navigate = useNavigate();
+  const [isAddChartOpen, setIsAddChartOpen] = useState(false);
+
+  const handleCreateDashboard = () => {
+    setIsAddChartOpen(true);
+  };
+
+  const handleViewDashboard = () => {
+    navigate('/dashboard-detail');
+  };
+
   return (
     <div className="flex min-h-screen bg-neutral-950">
       <AppSidebar />
@@ -26,7 +40,10 @@ export default function Reporting() {
 
           {/* Create Button */}
           <div className="px-8 py-4 border-b border-neutral-800">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2">
+            <Button
+              onClick={handleCreateDashboard}
+              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+            >
               <Plus className="w-4 h-4" />
               Create
             </Button>
@@ -49,7 +66,10 @@ export default function Reporting() {
               {/* Dashboard Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Create Dashboard Card */}
-                <div className="border-2 border-dashed border-neutral-700 rounded-lg p-8 flex flex-col items-center justify-center hover:border-neutral-600 cursor-pointer transition-colors min-h-[180px]">
+                <div
+                  onClick={handleCreateDashboard}
+                  className="border-2 border-dashed border-neutral-700 rounded-lg p-8 flex flex-col items-center justify-center hover:border-neutral-600 cursor-pointer transition-colors min-h-[180px]"
+                >
                   <div className="w-12 h-12 rounded-lg bg-neutral-800 flex items-center justify-center mb-3">
                     <Plus className="w-6 h-6 text-neutral-400" />
                   </div>
@@ -57,7 +77,10 @@ export default function Reporting() {
                 </div>
 
                 {/* My First Dashboard Card - Large */}
-                <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 hover:bg-neutral-800/50 cursor-pointer transition-colors min-h-[180px] md:col-span-2">
+                <div
+                  onClick={handleViewDashboard}
+                  className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 hover:bg-neutral-800/50 cursor-pointer transition-colors min-h-[180px] md:col-span-2"
+                >
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center flex-shrink-0">
                       <LayoutGrid className="w-6 h-6 text-white" />
@@ -75,7 +98,10 @@ export default function Reporting() {
                 </div>
 
                 {/* My First Dashboard Card - Small */}
-                <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 hover:bg-neutral-800/50 cursor-pointer transition-colors min-h-[180px]">
+                <div
+                  onClick={handleViewDashboard}
+                  className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 hover:bg-neutral-800/50 cursor-pointer transition-colors min-h-[180px]"
+                >
                   <div className="flex flex-col h-full">
                     <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center mb-4">
                       <LayoutGrid className="w-6 h-6 text-white" />
@@ -94,6 +120,8 @@ export default function Reporting() {
           </div>
         </main>
       </div>
+
+      <AddChartDialog open={isAddChartOpen} onOpenChange={setIsAddChartOpen} />
     </div>
   );
 }
