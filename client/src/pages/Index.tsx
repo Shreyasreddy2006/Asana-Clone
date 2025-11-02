@@ -3,7 +3,11 @@ import Hero from "@/components/Hero";
 import TrustedBy from "@/components/TrustedBy";
 import UseCases from "@/components/UseCases";
 import Features from "@/components/Features";
-import CTA from "@/components/CTA";
+import Integrations from "@/components/Integrations";
+import Testimonials from "@/components/Testimonials";
+import GetStarted from "@/components/GetStarted";
+import Awards from "@/components/Awards";
+import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -14,7 +18,11 @@ const Index = () => {
       <TrustedBy />
       <UseCases />
       <Features />
-      <CTA />
+      <Integrations />
+      <Testimonials />
+      <GetStarted />
+      <Awards />
+      <FinalCTA />
       <Footer />
     </div>
   );

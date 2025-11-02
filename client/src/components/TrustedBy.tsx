@@ -8,21 +8,26 @@ const TrustedBy = () => {
   ];
 
   return (
-    <section className="bg-background py-16">
+    <section className="bg-background py-20">
       <div className="container mx-auto px-6">
-        <h3 className="text-center text-sm font-semibold text-muted-foreground mb-10">
-          85% of Fortune 100 companies choose Asana¹
-        </h3>
-        <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12">
-          {companies.map((company) => (
-            <div key={company.name} className="opacity-60 hover:opacity-100 transition-opacity grayscale hover:grayscale-0">
-              <img 
-                src={company.logo} 
-                alt={company.name}
-                className="h-8 md:h-10 w-auto"
-              />
-            </div>
-          ))}
+        <div className="max-w-7xl mx-auto">
+          <h3 className="text-left text-base font-normal text-foreground mb-12">
+            85% of Fortune 100 companies choose Asana<sup>1</sup>
+          </h3>
+          <div className="flex flex-wrap items-center justify-between gap-12 md:gap-16">
+            {companies.map((company) => (
+              <div
+                key={company.name}
+                className="opacity-70 hover:opacity-100 transition-opacity"
+              >
+                <img
+                  src={company.logo}
+                  alt={company.name}
+                  className="h-10 md:h-12 w-auto"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

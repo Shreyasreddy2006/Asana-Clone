@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -9,41 +9,44 @@ const Navigation = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">
             <Link to="/" className="flex items-center gap-2">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="8" cy="8" r="6" fill="#F06A6A"/>
-                <circle cx="16" cy="16" r="6" fill="#FFB900"/>
-                <circle cx="12" cy="12" r="4" fill="#FCB400"/>
+              <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="28" r="18" fill="#F06A6A"/>
+                <circle cx="28" cy="62" r="18" fill="#F06A6A"/>
+                <circle cx="72" cy="62" r="18" fill="#F06A6A"/>
               </svg>
               <span className="text-xl font-bold text-foreground">asana</span>
             </Link>
 
             <div className="hidden md:flex items-center gap-6">
-              <button className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
+              <button className="flex items-center gap-1 text-sm font-normal text-foreground hover:text-primary transition-colors">
                 Product <ChevronDown className="w-4 h-4" />
               </button>
-              <button className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
+              <button className="flex items-center gap-1 text-sm font-normal text-foreground hover:text-primary transition-colors">
                 Solutions <ChevronDown className="w-4 h-4" />
               </button>
-              <button className="flex items-center gap-1 text-sm font-medium text-foreground hover:text-primary transition-colors">
-                Resources <ChevronDown className="w-4 h-4" />
+              <button className="flex items-center gap-1 text-sm font-normal text-foreground hover:text-primary transition-colors">
+                Learning & support <ChevronDown className="w-4 h-4" />
               </button>
-              <button className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+              <button className="text-sm font-normal text-foreground hover:text-primary transition-colors">
                 Pricing
               </button>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+            <button className="hidden lg:block">
+              <Globe className="w-5 h-5 text-foreground hover:text-primary transition-colors" />
+            </button>
+            <button className="text-sm font-normal text-foreground hover:text-primary transition-colors hidden lg:block">
               Contact sales
             </button>
             <Link to="/login">
-              <Button variant="ghost" size="sm" className="font-medium">
+              <Button variant="ghost" size="sm" className="font-normal">
                 Log In
               </Button>
             </Link>
             <Link to="/register">
-              <Button size="sm" className="font-semibold">
+              <Button size="sm" className="font-medium bg-black text-white hover:bg-gray-800 rounded-md">
                 Get started
               </Button>
             </Link>

@@ -1,56 +1,110 @@
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 const Features = () => {
-  const features = [
-    {
-      title: "AI-powered work management",
-      description: "Let AI help you plan projects, write briefs, and automate repetitive tasks so you can focus on the work that matters.",
-      image: "https://assets.asana.biz/m/6a6dfbf21c6e3a94/original/ai-capabilities.png",
-    },
-    {
-      title: "Connect your tools",
-      description: "Sync your work across 200+ integrations including Slack, Microsoft Teams, Adobe Creative Cloud, and more.",
-      image: "https://assets.asana.biz/m/5f0b3f3e8e4a6c8f/original/integrations.png",
-    },
-    {
-      title: "Multiple views for every team",
-      description: "View your work your way with List, Board, Timeline, Calendar, and Gantt views that adapt to how you work best.",
-      image: "https://assets.asana.biz/m/1a9b8c7d6e5f4a3b/original/views.png",
-    },
-  ];
-
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="py-24" style={{ backgroundColor: '#cbefff' }}>
       <div className="container mx-auto px-6">
-        <div className="space-y-24">
-          {features.map((feature, index) => (
-            <div 
-              key={index}
-              className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12 max-w-6xl mx-auto`}
-            >
-              <div className="flex-1">
-                <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                  {feature.title}
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-20 text-left">
+            What sets Asana apart
+          </h2>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Left Column - More clarity and accountability */}
+            <div className="rounded-2xl p-12 text-white flex flex-col justify-between min-h-[500px]" style={{ backgroundColor: '#222875' }}>
+              <div>
+                <h3 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
+                  More clarity and
+                  <br />
+                  accountability
                 </h3>
-                <p className="text-lg text-muted-foreground mb-6">
-                  {feature.description}
+                <p className="text-lg text-white/90 mb-8 leading-relaxed">
+                  Connect strategic goals to the teams that help achieve them. Keep your company on track with AI working alongside your teams.
                 </p>
-                <Button variant="link" className="text-primary p-0 text-base font-semibold">
-                  Learn more →
-                </Button>
               </div>
-              <div className="flex-1">
-                <Card className="overflow-hidden shadow-lg border-border">
-                  <div className="aspect-video bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center">
-                    <div className="text-6xl">
-                      {index === 0 ? "🤖" : index === 1 ? "🔗" : "📱"}
+              <Button
+                variant="outline"
+                className="self-start px-8 py-6 rounded-full bg-transparent border-2 border-white text-white hover:bg-white/10 font-medium"
+              >
+                Learn about goals
+              </Button>
+            </div>
+
+            {/* Right Column - Amplify your impact with AI */}
+            <div className="rounded-2xl p-12 text-white flex flex-col justify-between min-h-[500px] relative overflow-hidden" style={{ backgroundColor: '#222875' }}>
+              <div>
+                <h3 className="text-3xl md:text-4xl font-bold mb-6 leading-tight">
+                  Amplify your impact
+                  <br />
+                  with AI
+                </h3>
+                <p className="text-lg text-white/90 mb-8 leading-relaxed">
+                  Let Asana AI handle work for you—with the full context of your business—so your teams can achieve their goals faster.
+                </p>
+              </div>
+
+              {/* AI Activity Card */}
+              <div className="bg-white rounded-xl p-6 text-gray-900 mb-8">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <p className="text-sm">
+                      <span className="font-semibold">Nick</span> submitted a request to the 📺 Marketing Team
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 bg-pink-100 rounded flex items-center justify-center text-xs">
+                      ✨
+                    </div>
+                    <p className="text-sm">
+                      <span className="font-semibold">Asana AI</span> set Priority to{" "}
+                      <span className="inline-block bg-purple-600 text-white px-2 py-0.5 rounded text-xs font-medium">
+                        High
+                      </span>
+                    </p>
+                  </div>
+                  <div className="bg-blue-50 rounded-lg p-4 mt-4">
+                    <div className="flex items-start gap-2 mb-3">
+                      <div className="w-5 h-5 bg-pink-100 rounded flex items-center justify-center text-xs flex-shrink-0">
+                        ✨
+                      </div>
+                      <p className="text-sm font-semibold">Asana AI completed research</p>
+                    </div>
+                    <p className="text-sm text-gray-700 ml-7">
+                      Here are some insights I've found about your target audience for this campaign:
+                    </p>
+                    <div className="ml-7 mt-2 space-y-1">
+                      <a href="#" className="text-sm text-blue-600 hover:underline block">
+                        🔗 Source
+                      </a>
+                      <a href="#" className="text-sm text-blue-600 hover:underline block">
+                        🔗 Source
+                      </a>
                     </div>
                   </div>
-                </Card>
+                  <div className="flex items-center gap-3 mt-4">
+                    <div className="w-6 h-6 bg-pink-100 rounded flex items-center justify-center text-xs">
+                      ✨
+                    </div>
+                    <p className="text-sm">
+                      <span className="font-semibold">Asana AI</span> assigned to{" "}
+                      <span className="inline-flex items-center gap-1">
+                        <span className="w-5 h-5 bg-gray-300 rounded-full"></span>
+                        <span className="font-medium">Kai</span>
+                      </span>
+                    </p>
+                  </div>
+                </div>
               </div>
+
+              <Button
+                variant="outline"
+                className="self-start px-8 py-6 rounded-full bg-transparent border-2 border-white text-white hover:bg-white/10 font-medium"
+              >
+                Meet Asana AI
+              </Button>
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </section>
