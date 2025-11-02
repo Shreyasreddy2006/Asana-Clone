@@ -19,6 +19,7 @@ import Portfolios from "./pages/Portfolios";
 import PortfolioSetup from "./pages/PortfolioSetup";
 import PortfolioDetail from "./pages/PortfolioDetail";
 import DashboardDetail from "./pages/DashboardDetail";
+import Workspace from "./pages/Workspace";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -126,6 +127,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <DashboardDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/workspace"
+            element={
+              <ProtectedRoute>
+                <Workspace />
               </ProtectedRoute>
             }
           />
