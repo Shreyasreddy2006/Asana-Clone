@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { X, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function PortfolioSetup() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const portfolioName = location.state?.portfolioName || 'New Portfolio';
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   return (
@@ -74,7 +76,7 @@ export default function PortfolioSetup() {
           </div>
 
           <Button
-            onClick={() => navigate('/portfolio-detail')}
+            onClick={() => navigate('/portfolio-detail', { state: { portfolioName } })}
             className="bg-blue-600 hover:bg-blue-700 text-white mt-8 w-full py-6 text-base"
           >
             Go to portfolio
