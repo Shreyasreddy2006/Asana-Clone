@@ -3,6 +3,8 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { X, ChevronDown, MoreHorizontal, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { notificationService, Notification as ApiNotification } from '@/services/notification.service';
+import { formatDistanceToNow } from 'date-fns';
 
 interface Notification {
   id: string;
@@ -34,6 +36,11 @@ export default function Inbox() {
   const [renameValue, setRenameValue] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
+
+  // API state
+  const [apiNotifications, setApiNotifications] = useState<ApiNotification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const handleCreateCustomTab = () => {
     const newTab: CustomTab = {
@@ -88,6 +95,83 @@ export default function Inbox() {
     setRenameValue('');
   };
 
+  // Fetch notifications from API
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true);
+        const response = await notificationService.getAll({ limit: 50 });
+        setApiNotifications(response.data.notifications);
+        setUnreadCount(response.data.unreadCount);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  // Mark notification as read
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await notificationService.markAsRead(id);
+      setApiNotifications((prev) =>
+        prev.map((n) => (n._id === id ? { ...n, read: true, readAt: new Date().toISOString() } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+  };
+
+  // Archive all notifications
+  const handleArchiveAll = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      setApiNotifications((prev) =>
+        prev.map((n) => ({ ...n, read: true, readAt: new Date().toISOString() }))
+      );
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Failed to archive all notifications:', error);
+    }
+  };
+
+  // Convert API notification type to UI type
+  const getNotificationType = (type: ApiNotification['type']): 'alert' | 'assignment' | 'message' => {
+    if (type === 'task_due_soon' || type === 'task_overdue' || type === 'workspace_invite' || type === 'project_invite') {
+      return 'alert';
+    }
+    if (type === 'task_assigned') {
+      return 'assignment';
+    }
+    return 'message';
+  };
+
+  // Format timestamp
+  const formatTimestamp = (date: string): string => {
+    try {
+      return formatDistanceToNow(new Date(date), { addSuffix: true });
+    } catch {
+      return 'Recently';
+    }
+  };
+
+  // Transform API notifications to UI notifications
+  const transformedNotifications: Notification[] = apiNotifications.map((apiNotif) => ({
+    id: apiNotif._id,
+    type: getNotificationType(apiNotif.type),
+    title: apiNotif.title,
+    sender: apiNotif.sender?.name,
+    senderAvatar: apiNotif.sender?.avatar || apiNotif.sender?.name?.charAt(0).toUpperCase(),
+    message: apiNotif.message,
+    timestamp: formatTimestamp(apiNotif.createdAt),
+    isRead: apiNotif.read,
+    isDueSoon: apiNotif.type === 'task_due_soon',
+  }));
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -105,40 +189,10 @@ export default function Inbox() {
     };
   }, []);
 
-  // Mock notifications data
-  const notifications: Notification[] = [
-    {
-      id: '1',
-      type: 'alert',
-      title: 'Alert: Asana invitation could not be delivered to damfo@gmail.com',
-      timestamp: 'Due soon',
-      isRead: false,
-      isDueSoon: true,
-    },
-    {
-      id: '2',
-      type: 'assignment',
-      title: 'Asana assigned to you',
-      sender: 'Asana',
-      senderAvatar: '🎯',
-      timestamp: 'Today at 7:09am',
-      isRead: false,
-    },
-    {
-      id: '3',
-      type: 'message',
-      title: 'Teamwork makes work happen!',
-      sender: 'Yeti',
-      senderAvatar: '🐻',
-      message: 'Inbox is where you get updates, notifications, and messages from your teammates. Send an invite to start collaborating.',
-      timestamp: 'Today at 7:06am',
-      isRead: false,
-    },
-  ];
+  // Use transformed notifications from API, fallback to empty array
+  const todayNotifications = transformedNotifications;
 
-  const todayNotifications = notifications;
-
-  return (
+  return (<>
     <div className="flex min-h-screen bg-neutral-950">
       <AppSidebar />
 
@@ -312,84 +366,112 @@ export default function Inbox() {
                   </div>
                 )}
 
-                {/* Today Section */}
-                <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-neutral-400 mb-4">Today</h3>
-
-                  <div className="space-y-2">
-                    {todayNotifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 hover:bg-neutral-800/50 cursor-pointer transition-colors relative"
-                      >
-                        {!notification.isRead && (
-                          <div className="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-500 rounded-full" />
-                        )}
-
-                        <div className="flex items-start gap-4 ml-4">
-                          {/* Avatar/Icon */}
-                          {notification.type === 'alert' ? (
-                            <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center flex-shrink-0">
-                              <span className="text-lg">⚠</span>
-                            </div>
-                          ) : notification.type === 'assignment' ? (
-                            <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
-                              <span className="text-lg">{notification.senderAvatar}</span>
-                            </div>
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                              <span className="text-lg">{notification.senderAvatar}</span>
-                            </div>
-                          )}
-
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2 mb-1">
-                              <div className="flex items-center gap-2">
-                                {notification.type === 'alert' && (
-                                  <input
-                                    type="checkbox"
-                                    className="w-4 h-4 rounded border-neutral-600 bg-neutral-800"
-                                  />
-                                )}
-                                <h4 className="text-sm font-medium">{notification.title}</h4>
-                              </div>
-                              {notification.isDueSoon && (
-                                <span className="text-xs text-red-400 whitespace-nowrap">
-                                  Due soon
-                                </span>
-                              )}
-                            </div>
-
-                            {notification.sender && !notification.message && (
-                              <p className="text-xs text-neutral-400 mb-1">
-                                {notification.sender} · {notification.timestamp}
-                              </p>
-                            )}
-
-                            {notification.message && (
-                              <>
-                                <p className="text-sm text-neutral-400 mb-2">
-                                  {notification.sender} · {notification.timestamp}
-                                </p>
-                                <p className="text-sm text-neutral-300">
-                                  {notification.message}
-                                </p>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                {/* Loading State */}
+                {loading && (
+                  <div className="flex justify-center items-center py-20">
+                    <div className="text-neutral-400">Loading notifications...</div>
                   </div>
-                </div>
+                )}
 
-                {/* Archive Link */}
-                <div className="text-center pt-8">
-                  <button className="text-sm text-blue-400 hover:text-blue-300">
-                    Archive all notifications
-                  </button>
-                </div>
+                {/* Empty State */}
+                {!loading && todayNotifications.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-20">
+                    <div className="mb-8">
+                      <Bell className="w-32 h-32 text-pink-200" fill="#fce7f3" strokeWidth={1} />
+                    </div>
+                    <h2 className="text-xl font-semibold mb-2">No notifications yet</h2>
+                    <p className="text-sm text-neutral-400">
+                      You're all caught up! New notifications will appear here.
+                    </p>
+                  </div>
+                )}
+
+                {/* Today Section */}
+                {!loading && todayNotifications.length > 0 && (
+                  <>
+                    <div className="mb-6">
+                      <h3 className="text-sm font-semibold text-neutral-400 mb-4">Today</h3>
+
+                      <div className="space-y-2">
+                        {todayNotifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
+                            className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 hover:bg-neutral-800/50 cursor-pointer transition-colors relative"
+                          >
+                            {!notification.isRead && (
+                              <div className="absolute left-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-500 rounded-full" />
+                            )}
+
+                            <div className="flex items-start gap-4 ml-4">
+                              {/* Avatar/Icon */}
+                              {notification.type === 'alert' ? (
+                                <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-lg">⚠</span>
+                                </div>
+                              ) : notification.type === 'assignment' ? (
+                                <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-lg">{notification.senderAvatar}</span>
+                                </div>
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-lg">{notification.senderAvatar}</span>
+                                </div>
+                              )}
+
+                              {/* Content */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2 mb-1">
+                                  <div className="flex items-center gap-2">
+                                    {notification.type === 'alert' && (
+                                      <input
+                                        type="checkbox"
+                                        className="w-4 h-4 rounded border-neutral-600 bg-neutral-800"
+                                      />
+                                    )}
+                                    <h4 className="text-sm font-medium">{notification.title}</h4>
+                                  </div>
+                                  {notification.isDueSoon && (
+                                    <span className="text-xs text-red-400 whitespace-nowrap">
+                                      Due soon
+                                    </span>
+                                  )}
+                                </div>
+
+                                {notification.sender && !notification.message && (
+                                  <p className="text-xs text-neutral-400 mb-1">
+                                    {notification.sender} · {notification.timestamp}
+                                  </p>
+                                )}
+
+                                {notification.message && (
+                                  <>
+                                    <p className="text-sm text-neutral-400 mb-2">
+                                      {notification.sender} · {notification.timestamp}
+                                    </p>
+                                    <p className="text-sm text-neutral-300">
+                                      {notification.message}
+                                    </p>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                  {/* Archive Link */}
+                  <div className="text-center pt-8">
+                    <button
+                      onClick={handleArchiveAll}
+                      className="text-sm text-blue-400 hover:text-blue-300"
+                    >
+                      Archive all notifications
+                    </button>
+                  </div>
+                </>
+              )}
               </>
             )}
 
@@ -532,5 +614,5 @@ export default function Inbox() {
         </div>
       )}
     </div>
-  );
+   </>);
 }
