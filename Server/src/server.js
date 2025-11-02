@@ -1,7 +1,12 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const helmet = require('helmet');
 const connectDB = require('./config/database');
+const { errorHandler } = require('./utils/errorHandler');
+const { initSocket } = require('./utils/socket');
+const { initRedis } = require('./utils/cache');
+const { httpLogger, log } = require('./utils/logger');
 
 // Load env vars
 dotenv.config();
@@ -9,7 +14,28 @@ dotenv.config();
 // Connect to database
 connectDB();
 
+// Initialize Redis (optional - only in production or if enabled)
+initRedis().catch(err => {
+  log.info('Redis initialization skipped', { error: err.message });
+});
+
 const app = express();
+
+// Security middleware - Helmet
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
+
+// HTTP request logging
+app.use(httpLogger);
 
 // Body parser middleware
 app.use(express.json());
@@ -29,6 +55,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/workspaces', require('./routes/workspaces'));
 app.use('/api/projects', require('./routes/projects'));
 app.use('/api/tasks', require('./routes/tasks'));
+app.use('/api/teams', require('./routes/teams'));
 
 // Health check route
 app.get('/api/health', (req, res) => {
@@ -39,24 +66,22 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.statusCode || 500).json({
-    success: false,
-    message: err.message || 'Server Error'
-  });
-});
+// Error handler - must be last
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 8765;
 
 const server = app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  log.info(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
+
+// Initialize Socket.io
+initSocket(server);
+log.info('Socket.io initialized');
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {
-  console.log(`Error: ${err.message}`);
+  log.error('Unhandled Promise Rejection', { error: err.message, stack: err.stack });
   server.close(() => process.exit(1));
 });
 

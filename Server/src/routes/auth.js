@@ -3,15 +3,18 @@ const {
   register,
   login,
   getMe,
-  updateProfile
+  updateProfile,
+  completeOnboarding
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
+const { authLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
-router.post('/register', register);
-router.post('/login', login);
+router.post('/register', authLimiter, register);
+router.post('/login', authLimiter, login);
 router.get('/me', protect, getMe);
 router.put('/profile', protect, updateProfile);
+router.post('/onboarding', protect, completeOnboarding);
 
 module.exports = router;

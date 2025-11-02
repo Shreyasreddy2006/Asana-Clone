@@ -122,4 +122,47 @@ export const taskService = {
     const response = await api.put(`/tasks/${taskId}/subtasks/${subtaskId}`, data);
     return response.data;
   },
+
+  // Delete subtask
+  deleteSubtask: async (taskId: string, subtaskId: string): Promise<{ success: boolean; task: Task }> => {
+    const response = await api.delete(`/tasks/${taskId}/subtasks/${subtaskId}`);
+    return response.data;
+  },
+
+  // Update comment
+  updateComment: async (taskId: string, commentId: string, text: string): Promise<{ success: boolean; task: Task }> => {
+    const response = await api.put(`/tasks/${taskId}/comments/${commentId}`, { text });
+    return response.data;
+  },
+
+  // Delete comment
+  deleteComment: async (taskId: string, commentId: string): Promise<{ success: boolean; task: Task }> => {
+    const response = await api.delete(`/tasks/${taskId}/comments/${commentId}`);
+    return response.data;
+  },
+
+  // Add follower (follow task)
+  addFollower: async (taskId: string): Promise<{ success: boolean; task: Task }> => {
+    const response = await api.post(`/tasks/${taskId}/followers`);
+    return response.data;
+  },
+
+  // Remove follower (unfollow task)
+  removeFollower: async (taskId: string, userId?: string): Promise<{ success: boolean; task: Task }> => {
+    const url = userId ? `/tasks/${taskId}/followers/${userId}` : `/tasks/${taskId}/followers`;
+    const response = await api.delete(url);
+    return response.data;
+  },
+
+  // Add dependency
+  addDependency: async (taskId: string, dependencyId: string): Promise<{ success: boolean; task: Task }> => {
+    const response = await api.post(`/tasks/${taskId}/dependencies`, { dependencyId });
+    return response.data;
+  },
+
+  // Remove dependency
+  removeDependency: async (taskId: string, dependencyId: string): Promise<{ success: boolean; task: Task }> => {
+    const response = await api.delete(`/tasks/${taskId}/dependencies/${dependencyId}`);
+    return response.data;
+  },
 };

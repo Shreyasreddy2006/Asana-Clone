@@ -221,3 +221,229 @@ exports.addSection = async (req, res) => {
     });
   }
 };
+
+// @desc    Update section
+// @route   PUT /api/projects/:id/sections/:sectionId
+// @access  Private
+exports.updateSection = async (req, res) => {
+  try {
+    const { name, order } = req.body;
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found'
+      });
+    }
+
+    const section = project.sections.id(req.params.sectionId);
+    if (!section) {
+      return res.status(404).json({
+        success: false,
+        message: 'Section not found'
+      });
+    }
+
+    if (name) section.name = name;
+    if (order !== undefined) section.order = order;
+
+    await project.save();
+
+    res.json({
+      success: true,
+      data: project
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Delete section
+// @route   DELETE /api/projects/:id/sections/:sectionId
+// @access  Private
+exports.deleteSection = async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found'
+      });
+    }
+
+    const section = project.sections.id(req.params.sectionId);
+    if (!section) {
+      return res.status(404).json({
+        success: false,
+        message: 'Section not found'
+      });
+    }
+
+    section.deleteOne();
+    await project.save();
+
+    res.json({
+      success: true,
+      data: project
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Add member to project
+// @route   POST /api/projects/:id/members
+// @access  Private
+exports.addMember = async (req, res) => {
+  try {
+    const { userId, role } = req.body;
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found'
+      });
+    }
+
+    // Check if user is owner or admin
+    if (project.owner.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only project owner can add members'
+      });
+    }
+
+    // Check if user already a member
+    const existingMember = project.members.find(m => m.user.toString() === userId);
+    if (existingMember) {
+      return res.status(400).json({
+        success: false,
+        message: 'User is already a member of this project'
+      });
+    }
+
+    project.members.push({ user: userId, role: role || 'editor' });
+    await project.save();
+
+    const updatedProject = await Project.findById(project._id)
+      .populate('members.user', 'name email avatar');
+
+    res.json({
+      success: true,
+      data: updatedProject
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Update project member role
+// @route   PUT /api/projects/:id/members/:memberId
+// @access  Private
+exports.updateMember = async (req, res) => {
+  try {
+    const { role } = req.body;
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found'
+      });
+    }
+
+    // Check if user is owner
+    if (project.owner.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only project owner can update member roles'
+      });
+    }
+
+    const member = project.members.find(m => m.user.toString() === req.params.memberId);
+    if (!member) {
+      return res.status(404).json({
+        success: false,
+        message: 'Member not found in this project'
+      });
+    }
+
+    member.role = role;
+    await project.save();
+
+    const updatedProject = await Project.findById(project._id)
+      .populate('members.user', 'name email avatar');
+
+    res.json({
+      success: true,
+      data: updatedProject
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Remove member from project
+// @route   DELETE /api/projects/:id/members/:memberId
+// @access  Private
+exports.removeMember = async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+      return res.status(404).json({
+        success: false,
+        message: 'Project not found'
+      });
+    }
+
+    // Check if user is owner
+    if (project.owner.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Only project owner can remove members'
+      });
+    }
+
+    // Cannot remove owner
+    if (req.params.memberId === project.owner.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot remove project owner'
+      });
+    }
+
+    project.members = project.members.filter(
+      m => m.user.toString() !== req.params.memberId
+    );
+    await project.save();
+
+    const updatedProject = await Project.findById(project._id)
+      .populate('members.user', 'name email avatar');
+
+    res.json({
+      success: true,
+      data: updatedProject
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};

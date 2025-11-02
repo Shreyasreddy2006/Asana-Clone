@@ -43,7 +43,8 @@ export default function Register() {
       setShowError(false);
       await registerUser(data.name, data.email, data.password);
       toast.success('Account created successfully!');
-      navigate('/welcome');
+      // New users always go to onboarding
+      navigate('/onboarding');
     } catch (err) {
       setShowError(true);
     }

@@ -9,8 +9,8 @@ interface AuthState {
   error: string | null;
 
   // Actions
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User | null>;
+  register: (name: string, email: string, password: string) => Promise<User | null>;
   logout: () => void;
   loadUser: () => Promise<void>;
   clearError: () => void;
@@ -35,6 +35,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+      return response.user;
     } catch (error: any) {
       set({
         error: error.response?.data?.message || 'Login failed',
@@ -56,6 +57,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
+      return response.user;
     } catch (error: any) {
       set({
         error: error.response?.data?.message || 'Registration failed',

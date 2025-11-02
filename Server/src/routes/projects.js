@@ -5,7 +5,12 @@ const {
   createProject,
   updateProject,
   deleteProject,
-  addSection
+  addSection,
+  updateSection,
+  deleteSection,
+  addMember,
+  updateMember,
+  removeMember
 } = require('../controllers/projectController');
 const { protect } = require('../middleware/auth');
 
@@ -22,6 +27,14 @@ router.route('/:id')
   .put(updateProject)
   .delete(deleteProject);
 
+// Sections
 router.post('/:id/sections', addSection);
+router.put('/:id/sections/:sectionId', updateSection);
+router.delete('/:id/sections/:sectionId', deleteSection);
+
+// Members
+router.post('/:id/members', addMember);
+router.put('/:id/members/:memberId', updateMember);
+router.delete('/:id/members/:memberId', removeMember);
 
 module.exports = router;

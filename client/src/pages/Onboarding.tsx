@@ -5,7 +5,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, List, Calendar, LayoutList, X } from "lucide-react";
+import { ArrowLeft, List, Calendar, LayoutList, X, Loader2 } from "lucide-react";
+import { authService } from "@/services/auth.service";
+import { useAuthStore } from "@/store/auth.store";
+import { useWorkspaceStore } from "@/store/workspace.store";
+import { toast } from "sonner";
 
 type OnboardingStep = "role" | "tools" | "project" | "tasks" | "sections" | "layout" | "invite";
 
@@ -22,6 +26,9 @@ const Onboarding = () => {
   const [selectedLayout, setSelectedLayout] = useState("List");
   const [inviteEmails, setInviteEmails] = useState<string[]>(["", "", ""]);
   const [showSkipPopup, setShowSkipPopup] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { loadUser } = useAuthStore();
+  const { fetchWorkspaces } = useWorkspaceStore();
 
   const roles = [
     "Team member / Individual contributor",
@@ -170,6 +177,36 @@ const Onboarding = () => {
     if (step === "tasks") return tasks.some(t => t.trim() !== "");
     if (step === "sections") return sections.every(s => s.trim() !== "");
     return true;
+  };
+
+  const handleCompleteOnboarding = async () => {
+    setIsSubmitting(true);
+    try {
+      await authService.completeOnboarding({
+        role,
+        workFunctions,
+        asanaUses,
+        selectedTools,
+        projectName,
+        tasks: tasks.filter(t => t.trim()),
+        sections,
+        layout: selectedLayout,
+        inviteEmails: inviteEmails.filter(e => e.trim())
+      });
+
+      // Reload user data to get updated onboarded status
+      await loadUser();
+
+      // Fetch workspaces to populate the store before navigating
+      await fetchWorkspaces();
+
+      toast.success("Welcome to Asana! Your workspace is ready.");
+      navigate('/dashboard');
+    } catch (error: any) {
+      console.error('Onboarding error:', error);
+      toast.error(error.response?.data?.message || "Failed to complete onboarding");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -542,9 +579,17 @@ const Onboarding = () => {
 
                 <Button
                   className="font-semibold"
-                  onClick={() => navigate('/dashboard')}
+                  onClick={handleCompleteOnboarding}
+                  disabled={isSubmitting}
                 >
-                  Take me to my project
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Setting up your workspace...
+                    </>
+                  ) : (
+                    'Take me to my project'
+                  )}
                 </Button>
               </div>
             </>

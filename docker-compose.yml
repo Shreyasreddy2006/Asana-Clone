@@ -1,0 +1,88 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: asana-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - asana-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: asana-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - asana-network
+    command: redis-server --appendonly yes
+
+  # Backend Server
+  server:
+    build:
+      context: ./Server
+      dockerfile: Dockerfile
+    container_name: asana-server
+    restart: unless-stopped
+    ports:
+      - "8765:8765"
+    environment:
+      NODE_ENV: production
+      PORT: 8765
+      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/asana-clone?authSource=admin
+      REDIS_URL: redis://redis:6379
+      REDIS_ENABLED: "true"
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
+      CLIENT_URL: http://localhost:8080
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.ethereal.email}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@asanaclone.com}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Asana Clone}
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - ./Server/uploads:/app/uploads
+    networks:
+      - asana-network
+
+  # Frontend Client
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: asana-client
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      VITE_API_URL: http://localhost:8765/api
+      VITE_SOCKET_URL: http://localhost:8765
+    depends_on:
+      - server
+    networks:
+      - asana-network
+
+networks:
+  asana-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local

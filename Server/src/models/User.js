@@ -41,6 +41,16 @@ const userSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  onboarded: {
+    type: Boolean,
+    default: false
+  },
+  onboardingData: {
+    role: String,
+    workFunctions: [String],
+    asanaUses: [String],
+    selectedTools: [String]
   }
 }, {
   timestamps: true

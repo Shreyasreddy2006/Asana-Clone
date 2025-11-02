@@ -1,14 +1,14 @@
 const express = require('express');
 const {
-  getWorkspaces,
-  getWorkspace,
-  createWorkspace,
-  updateWorkspace,
-  deleteWorkspace,
+  getTeams,
+  getTeam,
+  createTeam,
+  updateTeam,
+  deleteTeam,
   addMember,
   updateMember,
   removeMember
-} = require('../controllers/workspaceController');
+} = require('../controllers/teamController');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -16,13 +16,13 @@ const router = express.Router();
 router.use(protect);
 
 router.route('/')
-  .get(getWorkspaces)
-  .post(createWorkspace);
+  .get(getTeams)
+  .post(createTeam);
 
 router.route('/:id')
-  .get(getWorkspace)
-  .put(updateWorkspace)
-  .delete(deleteWorkspace);
+  .get(getTeam)
+  .put(updateTeam)
+  .delete(deleteTeam);
 
 // Members
 router.post('/:id/members', addMember);

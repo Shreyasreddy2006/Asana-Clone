@@ -80,4 +80,34 @@ export const projectService = {
     const response = await api.post(`/projects/${id}/sections`, data);
     return response.data;
   },
+
+  // Update section
+  updateSection: async (projectId: string, sectionId: string, data: { name?: string; order?: number }): Promise<{ success: boolean; project: Project }> => {
+    const response = await api.put(`/projects/${projectId}/sections/${sectionId}`, data);
+    return response.data;
+  },
+
+  // Delete section
+  deleteSection: async (projectId: string, sectionId: string): Promise<{ success: boolean; project: Project }> => {
+    const response = await api.delete(`/projects/${projectId}/sections/${sectionId}`);
+    return response.data;
+  },
+
+  // Add member to project
+  addMember: async (projectId: string, data: { userId: string; role?: 'owner' | 'editor' | 'viewer' }): Promise<{ success: boolean; project: Project }> => {
+    const response = await api.post(`/projects/${projectId}/members`, data);
+    return response.data;
+  },
+
+  // Update member role
+  updateMember: async (projectId: string, memberId: string, role: 'owner' | 'editor' | 'viewer'): Promise<{ success: boolean; project: Project }> => {
+    const response = await api.put(`/projects/${projectId}/members/${memberId}`, { role });
+    return response.data;
+  },
+
+  // Remove member from project
+  removeMember: async (projectId: string, memberId: string): Promise<{ success: boolean; project: Project }> => {
+    const response = await api.delete(`/projects/${projectId}/members/${memberId}`);
+    return response.data;
+  },
 };

@@ -32,6 +32,7 @@ exports.register = async (req, res) => {
           name: user.name,
           email: user.email,
           avatar: user.avatar,
+          onboarded: user.onboarded,
           token: generateToken(user._id)
         }
       });
@@ -84,6 +85,7 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         avatar: user.avatar,
+        onboarded: user.onboarded,
         token: generateToken(user._id)
       }
     });
@@ -143,6 +145,117 @@ exports.updateProfile = async (req, res) => {
       });
     }
   } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Complete onboarding
+// @route   POST /api/auth/onboarding
+// @access  Private
+exports.completeOnboarding = async (req, res) => {
+  try {
+    const { role, workFunctions, asanaUses, selectedTools, projectName, tasks, sections, layout, inviteEmails } = req.body;
+
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Update user with onboarding data
+    user.onboarded = true;
+    user.onboardingData = {
+      role,
+      workFunctions,
+      asanaUses,
+      selectedTools
+    };
+
+    await user.save();
+
+    // Create default workspace
+    const Workspace = require('../models/Workspace');
+    const workspace = await Workspace.create({
+      name: `${user.name}'s Workspace`,
+      owner: user._id,
+      members: [{
+        user: user._id,
+        role: 'owner'
+      }]
+    });
+
+    // Update user's workspaces array
+    user.workspaces.push(workspace._id);
+    await user.save();
+
+    // Create the project from onboarding
+    const Project = require('../models/Project');
+    const project = await Project.create({
+      name: projectName || 'My First Project',
+      workspace: workspace._id,
+      owner: user._id,
+      view: layout?.toLowerCase() || 'list',
+      members: [{
+        user: user._id,
+        role: 'owner'
+      }],
+      sections: sections?.map((name, index) => ({
+        name,
+        order: index
+      })) || [
+        { name: 'To Do', order: 0 },
+        { name: 'In Progress', order: 1 },
+        { name: 'Done', order: 2 }
+      ]
+    });
+
+    // Update workspace projects
+    workspace.projects.push(project._id);
+    await workspace.save();
+
+    // Create tasks from onboarding
+    const Task = require('../models/Task');
+    if (tasks && tasks.length > 0) {
+      const taskPromises = tasks
+        .filter(task => task && task.trim())
+        .map((taskTitle, index) => {
+          const sectionIndex = index % sections.length;
+          const section = project.sections[sectionIndex];
+
+          return Task.create({
+            title: taskTitle,
+            project: project._id,
+            section: section._id,
+            assignedBy: user._id,
+            order: index
+          });
+        });
+
+      await Promise.all(taskPromises);
+    }
+
+    res.json({
+      success: true,
+      data: {
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          onboarded: user.onboarded
+        },
+        workspace,
+        project
+      }
+    });
+  } catch (error) {
+    console.error('Onboarding error:', error);
     res.status(500).json({
       success: false,
       message: error.message

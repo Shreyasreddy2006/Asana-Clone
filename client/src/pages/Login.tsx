@@ -36,9 +36,15 @@ export default function Login() {
     try {
       clearError();
       setShowError(false);
-      await login(data.email, data.password);
+      const response = await login(data.email, data.password);
       toast.success('Welcome back!');
-      navigate('/welcome');
+
+      // Redirect based on onboarded status
+      if (response?.onboarded) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding');
+      }
     } catch (err) {
       setShowError(true);
     }

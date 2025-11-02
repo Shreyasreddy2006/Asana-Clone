@@ -20,6 +20,7 @@ export interface User {
   workspaces: string[];
   teams: string[];
   createdAt: string;
+  onboarded?: boolean;
 }
 
 export interface AuthResponse {
@@ -46,6 +47,7 @@ export const authService = {
         workspaces: userData.workspaces || [],
         teams: userData.teams || [],
         createdAt: userData.createdAt || new Date().toISOString(),
+        onboarded: userData.onboarded || false,
       },
     };
   },
@@ -67,6 +69,7 @@ export const authService = {
         workspaces: userData.workspaces || [],
         teams: userData.teams || [],
         createdAt: userData.createdAt || new Date().toISOString(),
+        onboarded: userData.onboarded || false,
       },
     };
   },
@@ -74,12 +77,32 @@ export const authService = {
   // Get current user
   getMe: async (): Promise<{ success: boolean; user: User }> => {
     const response = await api.get('/auth/me');
-    return response.data;
+    // Transform server response format { success, data } to { success, user }
+    return {
+      success: response.data.success,
+      user: response.data.data,
+    };
   },
 
   // Update user profile
   updateProfile: async (data: Partial<User>): Promise<{ success: boolean; user: User }> => {
     const response = await api.put('/auth/profile', data);
+    return response.data;
+  },
+
+  // Complete onboarding
+  completeOnboarding: async (data: {
+    role: string;
+    workFunctions: string[];
+    asanaUses: string[];
+    selectedTools: string[];
+    projectName: string;
+    tasks: string[];
+    sections: string[];
+    layout: string;
+    inviteEmails?: string[];
+  }) => {
+    const response = await api.post('/auth/onboarding', data);
     return response.data;
   },
 
