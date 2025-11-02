@@ -14,6 +14,11 @@ import ProjectDetail from "./pages/ProjectDetail";
 import Welcome from "./pages/Welcome";
 import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
+import Goals from "./pages/Goals";
+import Portfolios from "./pages/Portfolios";
+import PortfolioSetup from "./pages/PortfolioSetup";
+import PortfolioDetail from "./pages/PortfolioDetail";
+import DashboardDetail from "./pages/DashboardDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -81,6 +86,46 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <ProjectDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/goals"
+            element={
+              <ProtectedRoute>
+                <Goals />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/portfolios"
+            element={
+              <ProtectedRoute>
+                <Portfolios />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/portfolio-setup"
+            element={
+              <ProtectedRoute>
+                <PortfolioSetup />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/portfolio-detail"
+            element={
+              <ProtectedRoute>
+                <PortfolioDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard-detail"
+            element={
+              <ProtectedRoute>
+                <DashboardDetail />
               </ProtectedRoute>
             }
           />
