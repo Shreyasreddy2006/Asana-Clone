@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import MyTasks from "./pages/MyTasks";
 import ProjectDetail from "./pages/ProjectDetail";
 import Welcome from "./pages/Welcome";
 import Onboarding from "./pages/Onboarding";
@@ -46,6 +47,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my-tasks"
+            element={
+              <ProtectedRoute>
+                <MyTasks />
               </ProtectedRoute>
             }
           />

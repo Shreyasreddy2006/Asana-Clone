@@ -27,10 +27,10 @@ export interface Task {
   _id: string;
   title: string;
   description?: string;
-  project: string;
+  project: string | { _id: string; name: string; color?: string };
   section?: string;
-  assignee?: string;
-  assignedBy?: string;
+  assignee?: string | { _id: string; name: string; email: string; avatar?: string };
+  assignedBy?: string | { _id: string; name: string; email: string; avatar?: string };
   status: 'todo' | 'in_progress' | 'completed' | 'blocked';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   dueDate?: string;
