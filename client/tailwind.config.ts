@@ -62,6 +62,17 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        priority: {
+          low: "hsl(var(--priority-low))",
+          medium: "hsl(var(--priority-medium))",
+          high: "hsl(var(--priority-high))",
+        },
+        status: {
+          "on-track": "hsl(var(--status-on-track))",
+          "at-risk": "hsl(var(--status-at-risk))",
+          "off-track": "hsl(var(--status-off-track))",
+        },
+        "hover-row": "hsl(var(--hover-row))",
       },
       borderRadius: {
         lg: "var(--radius)",
