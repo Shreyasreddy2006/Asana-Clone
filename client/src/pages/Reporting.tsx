@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import AddChartDialog from '@/components/AddChartDialog';
+import { useUIStore } from '@/store/ui.store';
 
 export default function Reporting() {
   const navigate = useNavigate();
+  const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
   const [isAddChartOpen, setIsAddChartOpen] = useState(false);
 
   const handleCreateDashboard = () => {
@@ -22,7 +24,7 @@ export default function Reporting() {
     <div className="flex min-h-screen bg-neutral-950">
       <AppSidebar />
 
-      <div className="flex-1 ml-60">
+      <div className={`flex-1 ${sidebarCollapsed ? 'ml-0' : 'ml-60'} transition-all duration-300`}>
         <DashboardHeader />
 
         <main className="pt-12 text-white">

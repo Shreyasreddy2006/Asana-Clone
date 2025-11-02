@@ -5,6 +5,7 @@ import { X, ChevronDown, MoreHorizontal, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { notificationService, Notification as ApiNotification } from '@/services/notification.service';
 import { formatDistanceToNow } from 'date-fns';
+import { useUIStore } from '@/store/ui.store';
 
 interface Notification {
   id: string;
@@ -26,6 +27,7 @@ interface CustomTab {
 }
 
 export default function Inbox() {
+  const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
   const [showSummary, setShowSummary] = useState(true);
   const [timeframe, setTimeframe] = useState('Past week');
   const [activeTab, setActiveTab] = useState<string>('activity');
@@ -196,7 +198,7 @@ export default function Inbox() {
     <div className="flex min-h-screen bg-neutral-950">
       <AppSidebar />
 
-      <div className="flex-1 ml-60">
+      <div className={`flex-1 ${sidebarCollapsed ? 'ml-16' : 'ml-60'} transition-all duration-300`}>
         <DashboardHeader />
 
         <main className="pt-12 text-white">

@@ -4,6 +4,7 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { Button } from '@/components/ui/button';
 import { Plus, LayoutGrid, FolderKanban, X, ChevronDown, List, Calendar, BarChart2 } from 'lucide-react';
+import { useUIStore } from '@/store/ui.store';
 
 interface Portfolio {
   id: string;
@@ -27,6 +28,7 @@ const DEFAULT_PORTFOLIOS: Portfolio[] = [
 
 export default function Portfolios() {
   const navigate = useNavigate();
+  const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [portfolioName, setPortfolioName] = useState('');
   const [selectedView, setSelectedView] = useState('list');
@@ -100,7 +102,7 @@ export default function Portfolios() {
     <div className="flex min-h-screen bg-neutral-950">
       <AppSidebar />
 
-      <div className="flex-1 ml-60">
+      <div className={`flex-1 ${sidebarCollapsed ? 'ml-0' : 'ml-60'} transition-all duration-300`}>
         <DashboardHeader />
 
         <main className="pt-12 text-white">

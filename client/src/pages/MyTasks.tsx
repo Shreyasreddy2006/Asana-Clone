@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/auth.store';
 import { useTaskStore } from '@/store/task.store';
+import { useUIStore } from '@/store/ui.store';
 import { AppSidebar } from '@/components/AppSidebar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import CreateTaskDialog from '@/components/CreateTaskDialog';
@@ -17,6 +18,7 @@ import { toast } from 'sonner';
 export default function MyTasks() {
   const { user, isLoading } = useAuthStore();
   const { tasks, fetchTasks, updateTask } = useTaskStore();
+  const { sidebarCollapsed } = useUIStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'list' | 'board' | 'calendar' | 'dashboard' | 'files'>('list');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -319,7 +321,7 @@ export default function MyTasks() {
     <div className="flex min-h-screen bg-neutral-950">
       <AppSidebar />
 
-      <div className="flex-1 ml-60">
+      <div className={`flex-1 ${sidebarCollapsed ? 'ml-0' : 'ml-60'} transition-all duration-300`}>
         <DashboardHeader />
 
         <main className="pt-12">

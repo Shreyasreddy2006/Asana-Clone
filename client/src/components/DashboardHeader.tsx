@@ -1,8 +1,14 @@
-import { Search, HelpCircle, Bell, Star } from "lucide-react";
+import { Search, HelpCircle, Bell, Star, Menu, Plus } from "lucide-react";
 import { useAuthStore } from "@/store/auth.store";
+import { useUIStore } from "@/store/ui.store";
+import { useState } from "react";
+import CreateProjectDialog from "./CreateProjectDialog";
+import { Button } from "./ui/button";
 
 export function DashboardHeader() {
   const { user } = useAuthStore();
+  const { sidebarCollapsed, toggleSidebar } = useUIStore();
+  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
 
   // Get user initials for avatar
   const getInitials = (name: string) => {
@@ -15,8 +21,24 @@ export function DashboardHeader() {
   };
 
   return (
-    <header className="h-12 bg-neutral-800 border-b border-neutral-700 flex items-center px-4 fixed top-0 right-0 left-60 z-10">
-      <div className="flex-1 max-w-2xl">
+    <>
+      <header className={`h-12 bg-neutral-800 border-b border-neutral-700 flex items-center px-4 fixed top-0 right-0 ${sidebarCollapsed ? 'left-0' : 'left-60'} z-10 transition-all duration-300`}>
+        <button
+          onClick={toggleSidebar}
+          className="p-2 hover:bg-neutral-700 rounded text-neutral-400 hover:text-white transition-colors mr-2"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
+        <Button
+          onClick={() => setIsCreateProjectOpen(true)}
+          className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white rounded-md px-3 py-1.5 text-sm font-medium transition-colors mr-4"
+        >
+          <Plus className="w-4 h-4" />
+          <span>Create</span>
+        </Button>
+
+        <div className="flex-1 max-w-2xl">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
           <input
@@ -43,5 +65,11 @@ export function DashboardHeader() {
         </div>
       </div>
     </header>
+
+    <CreateProjectDialog
+      open={isCreateProjectOpen}
+      onOpenChange={setIsCreateProjectOpen}
+    />
+    </>
   );
 }
