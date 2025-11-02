@@ -5,8 +5,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { X, Info, Users } from 'lucide-react';
 import { useState } from 'react';
+import { useUIStore } from '@/store/ui.store';
 
 export default function Goals() {
+  const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
   const [isCreateGoalOpen, setIsCreateGoalOpen] = useState(false);
   const [goalTitle, setGoalTitle] = useState('');
   const [members, setMembers] = useState('');
@@ -31,7 +33,7 @@ export default function Goals() {
     <div className="flex min-h-screen bg-neutral-950">
       <AppSidebar />
 
-      <div className="flex-1 ml-60">
+      <div className={`flex-1 ${sidebarCollapsed ? 'ml-0' : 'ml-60'} transition-all duration-300`}>
         <DashboardHeader />
 
         <main className="pt-12 text-white">

@@ -4,10 +4,12 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { Button } from '@/components/ui/button';
 import { Star, MoreHorizontal, X, Plus, Users } from 'lucide-react';
+import { useUIStore } from '@/store/ui.store';
 
 export default function PortfolioDetail() {
   const navigate = useNavigate();
   const location = useLocation();
+  const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
   const portfolioName = location.state?.portfolioName || 'hhhhh';
   const [showShareModal, setShowShareModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -19,7 +21,7 @@ export default function PortfolioDetail() {
     <div className="flex min-h-screen bg-neutral-950">
       <AppSidebar />
 
-      <div className="flex-1 ml-60">
+      <div className={`flex-1 ${sidebarCollapsed ? 'ml-0' : 'ml-60'} transition-all duration-300`}>
         <DashboardHeader />
 
         <main className="pt-12 text-white">

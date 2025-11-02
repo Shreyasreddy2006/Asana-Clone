@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useProjectStore } from '@/store/project.store';
 import { useTaskStore } from '@/store/task.store';
 import { useAuthStore } from '@/store/auth.store';
+import { useUIStore } from '@/store/ui.store';
 import { AppSidebar } from '@/components/AppSidebar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import CreateTaskDialog from '@/components/CreateTaskDialog';
@@ -28,6 +29,7 @@ export default function ProjectDetail() {
   const { user, isLoading: authLoading } = useAuthStore();
   const { projects, fetchProjects, currentProject, setCurrentProject, addSection } = useProjectStore();
   const { tasks, fetchTasks, updateTask, createTask } = useTaskStore();
+  const { sidebarCollapsed } = useUIStore();
   const [activeTab, setActiveTab] = useState<'overview' | 'list' | 'board' | 'timeline' | 'dashboard' | 'calendar' | 'workflow' | 'messages' | 'files'>('list');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -658,7 +660,7 @@ export default function ProjectDetail() {
     <div className="flex min-h-screen bg-neutral-950">
       <AppSidebar />
 
-      <div className="flex-1 ml-60">
+      <div className={`flex-1 ${sidebarCollapsed ? 'ml-0' : 'ml-60'} transition-all duration-300`}>
         <DashboardHeader />
 
         <main className="pt-12">
