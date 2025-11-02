@@ -149,44 +149,66 @@ export default function MyTasks() {
       <tr
         key={task._id}
         onClick={() => handleTaskClick(task._id)}
-        className="border-b border-neutral-800 hover:bg-neutral-800/50 cursor-pointer transition-colors"
+        className="border-b border-neutral-800/50 hover:bg-neutral-800/30 cursor-pointer transition-colors group"
       >
-        <td className="py-3 px-4">
+        <td className="py-2.5 px-4">
           <div className="flex items-center gap-3">
             <button
               onClick={(e) => handleToggleComplete(task, e)}
-              className="w-5 h-5 rounded-full border-2 border-neutral-500 hover:border-white transition-colors flex-shrink-0 flex items-center justify-center"
+              className="w-4 h-4 rounded-full border-2 border-neutral-600 hover:border-neutral-400 transition-colors flex-shrink-0 flex items-center justify-center relative"
             >
               {isCompleted && (
-                <CheckCircle2 className="w-5 h-5 text-green-500 fill-green-500" />
+                <div className="w-4 h-4 rounded-full bg-green-600 border-2 border-green-600 flex items-center justify-center absolute inset-0">
+                  <svg
+                    className="w-2.5 h-2.5 text-white"
+                    fill="none"
+                    strokeWidth="2.5"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
               )}
             </button>
-            <span className={`text-sm ${isCompleted ? 'text-neutral-500 line-through' : 'text-white'}`}>
+            <span className={`text-sm ${isCompleted ? 'text-neutral-500 line-through' : 'text-neutral-200'}`}>
               {task.title}
             </span>
           </div>
         </td>
-        <td className="py-3 px-4">
+        <td className="py-2.5 px-4">
           <span className="text-sm text-neutral-400">
             {formatDueDate(task.dueDate)}
           </span>
         </td>
-        <td className="py-3 px-4">
+        <td className="py-2.5 px-4">
           <div className="flex items-center gap-2">
-            {/* Collaborators - will show avatars when implemented */}
+            {task.assignee && (
+              typeof task.assignee === 'object' ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center text-xs font-semibold text-neutral-900">
+                    {task.assignee.name
+                      ?.split(' ')
+                      .map(n => n[0])
+                      .join('')
+                      .toUpperCase()
+                      .slice(0, 2) || 'U'}
+                  </div>
+                </div>
+              ) : null
+            )}
           </div>
         </td>
-        <td className="py-3 px-4">
+        <td className="py-2.5 px-4">
           <div className="flex items-center gap-2">
             <Circle
-              className="w-3 h-3"
+              className="w-2.5 h-2.5 fill-current"
               style={{
-                fill: typeof task.project === 'object' ? task.project?.color || '#06b6d4' : '#06b6d4',
                 color: typeof task.project === 'object' ? task.project?.color || '#06b6d4' : '#06b6d4'
               }}
             />
             <span
-              className="text-sm"
+              className="text-sm font-medium"
               style={{
                 color: typeof task.project === 'object' ? task.project?.color || '#06b6d4' : '#06b6d4'
               }}
@@ -195,12 +217,16 @@ export default function MyTasks() {
             </span>
           </div>
         </td>
-        <td className="py-3 px-4">
-          <span className="text-sm text-neutral-400">My workspace</span>
+        <td className="py-2.5 px-4">
+          <span className="text-xs text-neutral-500">
+            {task.assignee && typeof task.assignee === 'object' && task.assignee._id === user?._id
+              ? 'Only me'
+              : 'My workspace'}
+          </span>
         </td>
-        <td className="py-3 px-4">
-          <button className="p-1 hover:bg-neutral-700 rounded">
-            <Plus className="w-4 h-4 text-neutral-500" />
+        <td className="py-2.5 px-4 w-12">
+          <button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-neutral-700 rounded transition-opacity">
+            <Plus className="w-3.5 h-3.5 text-neutral-500" />
           </button>
         </td>
       </tr>
@@ -215,31 +241,31 @@ export default function MyTasks() {
     const isExpanded = expandedSections[sectionId];
 
     return (
-      <div key={sectionId} className="mb-6">
+      <div key={sectionId} className="mb-4">
         <button
           onClick={() => toggleSection(sectionId)}
-          className="flex items-center gap-2 mb-2 hover:text-white transition-colors"
+          className="flex items-center gap-2 mb-1 hover:text-white transition-colors group w-full"
         >
           {isExpanded ? (
-            <ChevronDown className="w-4 h-4 text-neutral-400" />
+            <ChevronDown className="w-3.5 h-3.5 text-neutral-500 group-hover:text-neutral-300" />
           ) : (
-            <ChevronRight className="w-4 h-4 text-neutral-400" />
+            <ChevronRight className="w-3.5 h-3.5 text-neutral-500 group-hover:text-neutral-300" />
           )}
-          <h2 className="text-base font-semibold text-white">{title}</h2>
+          <h2 className="text-sm font-semibold text-neutral-200">{title}</h2>
         </button>
 
         {isExpanded && (
           <>
             {tasks.length > 0 ? (
-              <table className="w-full">
+              <table className="w-full mb-1">
                 <tbody>{tasks.map(renderTaskRow)}</tbody>
               </table>
             ) : null}
             <button
               onClick={() => setIsCreateDialogOpen(true)}
-              className="flex items-center gap-2 py-2 px-4 text-sm text-neutral-400 hover:text-white transition-colors"
+              className="flex items-center gap-2 py-2 px-4 text-sm text-neutral-500 hover:text-neutral-300 transition-colors group"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
               <span>Add task...</span>
             </button>
           </>
@@ -297,44 +323,44 @@ export default function MyTasks() {
             </div>
 
             {/* Action Bar */}
-            <div className="px-6 py-3 border-t border-neutral-800 flex items-center justify-between">
+            <div className="px-6 py-2.5 border-t border-neutral-800/50 flex items-center justify-between bg-neutral-900/30">
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsCreateDialogOpen(true)}
-                  className="text-blue-500 hover:text-blue-400 hover:bg-blue-500/10 h-8"
+                  className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 h-7 text-xs font-medium"
                 >
-                  <Plus className="w-4 h-4 mr-1" />
+                  <Plus className="w-3.5 h-3.5 mr-1" />
                   Add task
                 </Button>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 text-xs"
+                  className="text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800/50 h-7 text-xs font-normal px-3"
                 >
                   Filter
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 text-xs"
+                  className="text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800/50 h-7 text-xs font-normal px-3"
                 >
                   Sort
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 text-xs"
+                  className="text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800/50 h-7 text-xs font-normal px-3"
                 >
                   Group
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-neutral-400 hover:text-white hover:bg-neutral-800 h-8 text-xs"
+                  className="text-neutral-500 hover:text-neutral-200 hover:bg-neutral-800/50 h-7 text-xs font-normal px-3"
                 >
                   Options
                 </Button>
@@ -342,17 +368,19 @@ export default function MyTasks() {
             </div>
 
             {/* Column Headers */}
-            <div className="px-6 bg-neutral-900/50">
+            <div className="px-6 bg-neutral-900/50 sticky top-12 z-10">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left border-b border-neutral-800">
-                    <th className="py-2 px-4 text-xs font-medium text-neutral-400">Name</th>
-                    <th className="py-2 px-4 text-xs font-medium text-neutral-400">Due date</th>
-                    <th className="py-2 px-4 text-xs font-medium text-neutral-400">Collaborators</th>
-                    <th className="py-2 px-4 text-xs font-medium text-neutral-400">Projects</th>
-                    <th className="py-2 px-4 text-xs font-medium text-neutral-400">Task visibility</th>
-                    <th className="py-2 px-4 text-xs font-medium text-neutral-400 w-12">
-                      <Plus className="w-4 h-4" />
+                  <tr className="text-left border-b border-neutral-800/50">
+                    <th className="py-2 px-4 text-xs font-normal text-neutral-500">Name</th>
+                    <th className="py-2 px-4 text-xs font-normal text-neutral-500">Due date</th>
+                    <th className="py-2 px-4 text-xs font-normal text-neutral-500">Collaborators</th>
+                    <th className="py-2 px-4 text-xs font-normal text-neutral-500">Projects</th>
+                    <th className="py-2 px-4 text-xs font-normal text-neutral-500">Task visibility</th>
+                    <th className="py-2 px-4 text-xs font-normal text-neutral-500 w-12">
+                      <button className="hover:bg-neutral-800 p-1 rounded transition-colors">
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
                     </th>
                   </tr>
                 </thead>
@@ -367,8 +395,8 @@ export default function MyTasks() {
             {renderSection('do-next-week', 'Do next week', sections['do-next-week'])}
             {renderSection('do-later', 'Do later', sections['do-later'])}
 
-            <button className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors mt-6">
-              <Plus className="w-4 h-4" />
+            <button className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-300 transition-colors mt-4 px-4 py-2">
+              <Plus className="w-3.5 h-3.5" />
               <span>Add section</span>
             </button>
           </div>
