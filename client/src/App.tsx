@@ -8,6 +8,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import MyTasks from "./pages/MyTasks";
+import Inbox from "./pages/Inbox";
+import Reporting from "./pages/Reporting";
 import ProjectDetail from "./pages/ProjectDetail";
 import Welcome from "./pages/Welcome";
 import Onboarding from "./pages/Onboarding";
@@ -55,6 +57,22 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <MyTasks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/inbox"
+            element={
+              <ProtectedRoute>
+                <Inbox />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reporting"
+            element={
+              <ProtectedRoute>
+                <Reporting />
               </ProtectedRoute>
             }
           />
