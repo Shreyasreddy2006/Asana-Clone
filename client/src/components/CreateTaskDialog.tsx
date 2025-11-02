@@ -45,9 +45,10 @@ interface CreateTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultSection?: string;
+  defaultProject?: string;
 }
 
-export default function CreateTaskDialog({ open, onOpenChange, defaultSection }: CreateTaskDialogProps) {
+export default function CreateTaskDialog({ open, onOpenChange, defaultSection, defaultProject }: CreateTaskDialogProps) {
   const { createTask, isLoading } = useTaskStore();
   const { projects, fetchProjects } = useProjectStore();
   const [dueDate, setDueDate] = useState<Date>();
@@ -74,8 +75,11 @@ export default function CreateTaskDialog({ open, onOpenChange, defaultSection }:
   useEffect(() => {
     if (open) {
       fetchProjects();
+      if (defaultProject) {
+        setValue('project', defaultProject);
+      }
     }
-  }, [open, fetchProjects]);
+  }, [open, fetchProjects, defaultProject, setValue]);
 
   const onSubmit = async (data: TaskFormData) => {
     try {
