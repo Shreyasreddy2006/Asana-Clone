@@ -4,6 +4,10 @@ import { useTaskStore } from '@/store/task.store';
 import { AppSidebar } from '@/components/AppSidebar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import CreateTaskDialog from '@/components/CreateTaskDialog';
+import BoardView from '@/components/BoardView';
+import CalendarView from '@/components/CalendarView';
+import DashboardView from '@/components/DashboardView';
+import FilesView from '@/components/FilesView';
 import { ChevronDown, ChevronRight, Plus, Circle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -274,6 +278,43 @@ export default function MyTasks() {
     );
   };
 
+  // Create a mock project for views that need it
+  const mockMyTasksProject = {
+    _id: 'my-tasks',
+    name: 'My Tasks',
+    description: '',
+    workspace: '',
+    owner: user?._id || '',
+    status: 'active' as const,
+    color: '#f59e0b',
+    icon: '📋',
+    view: 'list' as const,
+    sections: [
+      { _id: 'recently-assigned', name: 'Recently assigned', order: 0 },
+      { _id: 'do-today', name: 'Do today', order: 1 },
+      { _id: 'do-next-week', name: 'Do next week', order: 2 },
+      { _id: 'do-later', name: 'Do later', order: 3 },
+    ],
+    members: [],
+    createdBy: user?._id || '',
+    isPrivate: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  const handleUpdateTaskField = async (taskId: string, field: string, value: any) => {
+    try {
+      await updateTask(taskId, { [field]: value });
+      fetchTasks();
+    } catch (error) {
+      toast.error('Failed to update task');
+    }
+  };
+
+  const handleCreateTaskInSection = async (sectionId: string, title: string) => {
+    toast.info('Create task from board view - coming soon!');
+  };
+
   return (
     <div className="flex min-h-screen bg-neutral-950">
       <AppSidebar />
@@ -367,38 +408,72 @@ export default function MyTasks() {
               </div>
             </div>
 
-            {/* Column Headers */}
-            <div className="px-6 bg-neutral-900/50 sticky top-12 z-10">
-              <table className="w-full">
-                <thead>
-                  <tr className="text-left border-b border-neutral-800/50">
-                    <th className="py-2 px-4 text-xs font-normal text-neutral-500">Name</th>
-                    <th className="py-2 px-4 text-xs font-normal text-neutral-500">Due date</th>
-                    <th className="py-2 px-4 text-xs font-normal text-neutral-500">Collaborators</th>
-                    <th className="py-2 px-4 text-xs font-normal text-neutral-500">Projects</th>
-                    <th className="py-2 px-4 text-xs font-normal text-neutral-500">Task visibility</th>
-                    <th className="py-2 px-4 text-xs font-normal text-neutral-500 w-12">
-                      <button className="hover:bg-neutral-800 p-1 rounded transition-colors">
-                        <Plus className="w-3.5 h-3.5" />
-                      </button>
-                    </th>
-                  </tr>
-                </thead>
-              </table>
-            </div>
+            {/* Column Headers - Only show for List view */}
+            {activeTab === 'list' && (
+              <div className="px-6 bg-neutral-900/50 sticky top-12 z-10">
+                <table className="w-full">
+                  <thead>
+                    <tr className="text-left border-b border-neutral-800/50">
+                      <th className="py-2 px-4 text-xs font-normal text-neutral-500">Name</th>
+                      <th className="py-2 px-4 text-xs font-normal text-neutral-500">Due date</th>
+                      <th className="py-2 px-4 text-xs font-normal text-neutral-500">Collaborators</th>
+                      <th className="py-2 px-4 text-xs font-normal text-neutral-500">Projects</th>
+                      <th className="py-2 px-4 text-xs font-normal text-neutral-500">Task visibility</th>
+                      <th className="py-2 px-4 text-xs font-normal text-neutral-500 w-12">
+                        <button className="hover:bg-neutral-800 p-1 rounded transition-colors">
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            )}
           </div>
 
-          {/* Task Sections */}
+          {/* Content - Switch based on active tab */}
           <div className="px-6 py-6">
-            {renderSection('recently-assigned', 'Recently assigned', sections['recently-assigned'])}
-            {renderSection('do-today', 'Do today', sections['do-today'])}
-            {renderSection('do-next-week', 'Do next week', sections['do-next-week'])}
-            {renderSection('do-later', 'Do later', sections['do-later'])}
+            {activeTab === 'list' && (
+              <>
+                {renderSection('recently-assigned', 'Recently assigned', sections['recently-assigned'])}
+                {renderSection('do-today', 'Do today', sections['do-today'])}
+                {renderSection('do-next-week', 'Do next week', sections['do-next-week'])}
+                {renderSection('do-later', 'Do later', sections['do-later'])}
 
-            <button className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-300 transition-colors mt-4 px-4 py-2">
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add section</span>
-            </button>
+                <button className="flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-300 transition-colors mt-4 px-4 py-2">
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add section</span>
+                </button>
+              </>
+            )}
+
+            {activeTab === 'board' && (
+              <BoardView
+                project={mockMyTasksProject}
+                tasks={myTasks}
+                onUpdateTask={handleUpdateTaskField}
+                onCreateTask={handleCreateTaskInSection}
+              />
+            )}
+
+            {activeTab === 'calendar' && (
+              <CalendarView
+                project={mockMyTasksProject}
+                tasks={myTasks}
+                onUpdateTask={handleUpdateTaskField}
+              />
+            )}
+
+            {activeTab === 'dashboard' && (
+              <DashboardView
+                project={mockMyTasksProject}
+                tasks={myTasks}
+              />
+            )}
+
+            {activeTab === 'files' && (
+              <FilesView project={mockMyTasksProject} />
+            )}
           </div>
         </main>
       </div>

@@ -193,7 +193,7 @@ const createProject = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      project: populatedProject,
+      data: populatedProject,
     });
   } catch (error) {
     console.error('Create project error:', error);
@@ -545,7 +545,7 @@ const createSection = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      project,
+      data: project,
     });
   } catch (error) {
     console.error('Create section error:', error);
@@ -679,7 +679,7 @@ const createCustomField = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      project,
+      data: project,
     });
   } catch (error) {
     console.error('Create custom field error:', error);

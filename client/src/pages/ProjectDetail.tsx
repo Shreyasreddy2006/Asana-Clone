@@ -61,6 +61,24 @@ export default function ProjectDetail() {
     }
   }, [projectId, projects, setCurrentProject]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      // Check if click is outside dropdown
+      if (!target.closest('[data-dropdown]')) {
+        setOpenDropdown(null);
+      }
+    };
+
+    if (openDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [openDropdown]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-950">
@@ -340,7 +358,7 @@ export default function ProjectDetail() {
               <span className="text-sm text-neutral-400">{assigneeName}</span>
             </button>
             {isAssigneeDropdownOpen && (
-              <div className="absolute top-full left-0 mt-1 w-56 bg-neutral-800 border border-neutral-700 rounded-md shadow-lg z-50">
+              <div data-dropdown className="absolute top-full left-0 mt-1 w-56 bg-neutral-800 border border-neutral-700 rounded-md shadow-lg z-50">
                 <div className="py-1">
                   <div className="px-3 py-2 text-xs text-neutral-500 font-medium">Assign to</div>
                   <button
@@ -431,7 +449,7 @@ export default function ProjectDetail() {
               {getPriorityLabel(task.priority)}
             </button>
             {isPriorityDropdownOpen && (
-              <div className="absolute top-full left-0 mt-1 w-48 bg-neutral-800 border border-neutral-700 rounded-md shadow-lg z-50">
+              <div data-dropdown className="absolute top-full left-0 mt-1 w-48 bg-neutral-800 border border-neutral-700 rounded-md shadow-lg z-50">
                 <div className="py-1">
                   <button
                     onClick={() => handleUpdateTaskField(task._id, 'priority', null)}
@@ -498,7 +516,7 @@ export default function ProjectDetail() {
               {statusColor.label}
             </button>
             {isStatusDropdownOpen && (
-              <div className="absolute top-full left-0 mt-1 w-48 bg-neutral-800 border border-neutral-700 rounded-md shadow-lg z-50">
+              <div data-dropdown className="absolute top-full left-0 mt-1 w-48 bg-neutral-800 border border-neutral-700 rounded-md shadow-lg z-50">
                 <div className="py-1">
                   <button
                     onClick={() => handleUpdateTaskField(task._id, 'status', 'todo')}

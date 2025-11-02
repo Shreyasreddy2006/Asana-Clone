@@ -44,7 +44,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await projectService.create(data);
-      const newProject = response.project;
+      const newProject = response.data;
       set((state) => ({
         projects: [...state.projects, newProject],
         isLoading: false,
@@ -106,7 +106,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await projectService.addSection(projectId, { name, order });
-      const updatedProject = response.project;
+      const updatedProject = response.data;
       set((state) => ({
         projects: state.projects.map((p) =>
           p._id === projectId ? updatedProject : p

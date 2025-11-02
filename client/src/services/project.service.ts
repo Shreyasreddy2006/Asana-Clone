@@ -58,7 +58,7 @@ export const projectService = {
   },
 
   // Create new project
-  create: async (data: CreateProjectData): Promise<{ success: boolean; project: Project }> => {
+  create: async (data: CreateProjectData): Promise<{ success: boolean; data: Project }> => {
     const response = await api.post('/projects', data);
     return response.data;
   },
@@ -76,7 +76,7 @@ export const projectService = {
   },
 
   // Add section to project
-  addSection: async (id: string, data: { name: string; order?: number }): Promise<{ success: boolean; project: Project }> => {
+  addSection: async (id: string, data: { name: string; order?: number }): Promise<{ success: boolean; data: Project }> => {
     const response = await api.post(`/projects/${id}/sections`, data);
     return response.data;
   },
