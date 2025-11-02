@@ -12,10 +12,10 @@ const apiLimiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
-// Strict rate limiter for authentication routes - 5 requests per 15 minutes
+// Strict rate limiter for authentication routes - 50 requests per 15 minutes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 login/register requests per windowMs
+  max: 50, // Limit each IP to 50 login/register requests per windowMs
   message: {
     success: false,
     message: 'Too many authentication attempts from this IP, please try again after 15 minutes'

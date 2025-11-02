@@ -5,9 +5,12 @@ let io;
 
 // Initialize Socket.io
 const initSocket = (server) => {
+  const clientUrl = process.env.CLIENT_URL || 'http://localhost:8080';
+  const allowedOrigins = [clientUrl, 'http://localhost:8080', 'http://localhost:8081'];
+
   io = socketIO(server, {
     cors: {
-      origin: process.env.CLIENT_URL || 'http://localhost:8080',
+      origin: allowedOrigins,
       credentials: true
     }
   });
