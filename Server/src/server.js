@@ -5,7 +5,6 @@ const helmet = require('helmet');
 const connectDB = require('./config/database');
 const { errorHandler } = require('./utils/errorHandler');
 const { initSocket } = require('./utils/socket');
-const { initRedis } = require('./utils/cache');
 const { httpLogger, log } = require('./utils/logger');
 
 // Load env vars
@@ -13,11 +12,6 @@ dotenv.config();
 
 // Connect to database
 connectDB();
-
-// Initialize Redis (optional - only in production or if enabled)
-initRedis().catch(err => {
-  log.info('Redis initialization skipped', { error: err.message });
-});
 
 const app = express();
 
