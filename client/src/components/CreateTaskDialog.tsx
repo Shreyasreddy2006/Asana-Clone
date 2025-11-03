@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTaskStore } from '@/store/task.store';
 import { useProjectStore } from '@/store/project.store';
+import { useWorkspaceStore } from '@/store/workspace.store';
 import {
   Dialog,
   DialogContent,
@@ -51,6 +52,7 @@ interface CreateTaskDialogProps {
 export default function CreateTaskDialog({ open, onOpenChange, defaultSection, defaultProject }: CreateTaskDialogProps) {
   const { createTask, isLoading } = useTaskStore();
   const { projects, fetchProjects } = useProjectStore();
+  const { currentWorkspace } = useWorkspaceStore();
   const [dueDate, setDueDate] = useState<Date>();
 
   const {
@@ -73,13 +75,13 @@ export default function CreateTaskDialog({ open, onOpenChange, defaultSection, d
   const selectedProject = watch('project');
 
   useEffect(() => {
-    if (open) {
-      fetchProjects();
+    if (open && currentWorkspace) {
+      fetchProjects(currentWorkspace._id);
       if (defaultProject) {
         setValue('project', defaultProject);
       }
     }
-  }, [open, fetchProjects, defaultProject, setValue]);
+  }, [open, currentWorkspace, fetchProjects, defaultProject, setValue]);
 
   const onSubmit = async (data: TaskFormData) => {
     try {

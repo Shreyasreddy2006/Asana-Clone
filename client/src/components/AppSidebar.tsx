@@ -3,13 +3,21 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useProjectStore } from "@/store/project.store";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { useUIStore } from "@/store/ui.store";
+import { useEffect } from "react";
 
 export function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { projects } = useProjectStore();
+  const { projects, fetchProjects } = useProjectStore();
   const { currentWorkspace } = useWorkspaceStore();
   const { sidebarCollapsed } = useUIStore();
+
+  // Fetch projects when workspace changes
+  useEffect(() => {
+    if (currentWorkspace?._id) {
+      fetchProjects(currentWorkspace._id);
+    }
+  }, [currentWorkspace?._id, fetchProjects]);
 
   const navigationItems = [
     { title: "Home", icon: Home, url: "/dashboard" },

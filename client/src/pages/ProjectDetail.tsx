@@ -4,6 +4,7 @@ import { useProjectStore } from '@/store/project.store';
 import { useTaskStore } from '@/store/task.store';
 import { useAuthStore } from '@/store/auth.store';
 import { useUIStore } from '@/store/ui.store';
+import { useWorkspaceStore } from '@/store/workspace.store';
 import { AppSidebar } from '@/components/AppSidebar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import CreateTaskDialog from '@/components/CreateTaskDialog';
@@ -30,6 +31,7 @@ export default function ProjectDetail() {
   const { projects, fetchProjects, currentProject, setCurrentProject, addSection } = useProjectStore();
   const { tasks, fetchTasks, updateTask, createTask } = useTaskStore();
   const { sidebarCollapsed } = useUIStore();
+  const { currentWorkspace } = useWorkspaceStore();
   const [activeTab, setActiveTab] = useState<'overview' | 'list' | 'board' | 'timeline' | 'dashboard' | 'calendar' | 'workflow' | 'messages' | 'files'>('list');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -41,11 +43,11 @@ export default function ProjectDetail() {
   const [newSectionName, setNewSectionName] = useState('');
 
   useEffect(() => {
-    if (user && projectId) {
-      fetchProjects();
+    if (user && projectId && currentWorkspace) {
+      fetchProjects(currentWorkspace._id);
       fetchTasks({ project: projectId });
     }
-  }, [user, projectId]);
+  }, [user, projectId, currentWorkspace]);
 
   useEffect(() => {
     if (projectId && projects.length > 0) {
@@ -263,7 +265,7 @@ export default function ProjectDetail() {
   };
 
   const handleAddSection = async () => {
-    if (!newSectionName.trim() || !projectId) return;
+    if (!newSectionName.trim() || !projectId || !currentWorkspace) return;
 
     try {
       const nextOrder = currentProject?.sections?.length || 0;
@@ -273,7 +275,7 @@ export default function ProjectDetail() {
       setNewSectionName('');
 
       // Refresh projects to get updated sections
-      fetchProjects();
+      fetchProjects(currentWorkspace._id);
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to add section');
     }
