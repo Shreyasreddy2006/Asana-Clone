@@ -1,17 +1,52 @@
 import { AppSidebar } from '@/components/AppSidebar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { Button } from '@/components/ui/button';
-import { Plus, X, Search } from 'lucide-react';
+import { Plus, X, Search, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
+<<<<<<< Updated upstream
 import { useUIStore } from '@/store/ui.store';
+=======
+import TeamSettingsDialog from '@/components/TeamSettingsDialog';
+import WorkflowGallery from '@/pages/WorkflowGallery';
+import NewTemplate from '@/pages/NewTemplate';
+import CreateGoalDialog from '@/components/CreateGoalDialog';
+import InviteMembersDialog from '@/components/InviteMembersDialog';
+>>>>>>> Stashed changes
 
 export default function Workspace() {
   const { sidebarCollapsed } = useUIStore();
   const [showSetupCard, setShowSetupCard] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'members' | 'all-work' | 'messages' | 'calendar' | 'knowledge'>('overview');
-  const [showCreateEntryModal, setShowCreateEntryModal] = useState(false);
   const [showAddTabModal, setShowAddTabModal] = useState(false);
   const [showCreateWorkDropdown, setShowCreateWorkDropdown] = useState(false);
+  const [showTeamSettings, setShowTeamSettings] = useState(false);
+  const [showAddWorkMenu, setShowAddWorkMenu] = useState(false);
+  const [showWorkflowGallery, setShowWorkflowGallery] = useState(false);
+  const [showNewTemplate, setShowNewTemplate] = useState(false);
+  const [showCreateGoalDialog, setShowCreateGoalDialog] = useState(false);
+  const [showInviteMembersDialog, setShowInviteMembersDialog] = useState(false);
+  const [knowledgeEntries, setKnowledgeEntries] = useState<Array<{id: string, title: string, description: string}>>([]);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  const handleAddEntry = () => {
+    const newEntry = {
+      id: Date.now().toString(),
+      title: 'Untitled entry',
+      description: ''
+    };
+    setKnowledgeEntries([...knowledgeEntries, newEntry]);
+  };
+
+  const handleDeleteEntry = (id: string) => {
+    setKnowledgeEntries(knowledgeEntries.filter(entry => entry.id !== id));
+    setOpenMenuId(null);
+  };
+
+  const handleUpdateEntry = (id: string, field: 'title' | 'description', value: string) => {
+    setKnowledgeEntries(knowledgeEntries.map(entry =>
+      entry.id === id ? { ...entry, [field]: value } : entry
+    ));
+  };
 
   return (
     <div className="flex min-h-screen bg-neutral-950">
@@ -21,9 +56,20 @@ export default function Workspace() {
         <DashboardHeader />
 
         <main className="pt-12 text-white">
-          {/* Header with tabs */}
+          {/* Header section - My workspace title and icon */}
+          <div className="border-b border-neutral-800 px-4 py-6">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-16 h-16 rounded-full bg-neutral-700 flex items-center justify-center">
+                <span className="text-2xl font-semibold text-neutral-300">M</span>
+              </div>
+              <h1 className="text-2xl font-semibold">My workspace</h1>
+            </div>
+          </div>
+
+          {/* Tabs section */}
           <div className="border-b border-neutral-800 px-8 py-6">
             <div className="flex items-center justify-between mb-6">
+<<<<<<< Updated upstream
               {/* Right side - Action buttons */}
               {activeTab === 'members' && (
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2">
@@ -40,6 +86,10 @@ export default function Workspace() {
 
             {/* Tabs */}
             <div className="flex items-center gap-6 text-sm">
+=======
+              {/* Tabs */}
+              <div className="flex items-center gap-6 text-sm">
+>>>>>>> Stashed changes
               <button
                 onClick={() => setActiveTab('overview')}
                 className={`pb-3 ${activeTab === 'overview' ? 'border-b-2 border-white font-medium text-white' : 'text-neutral-400 hover:text-white'}`}
@@ -115,16 +165,59 @@ export default function Workspace() {
                   </>
                 )}
               </div>
+              </div>
+
+              {/* Right side - Action buttons based on active tab */}
+              <div>
+                {activeTab === 'members' && (
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Invite
+                  </Button>
+                )}
+                {activeTab === 'all-work' && (
+                  <Button
+                    onClick={() => setShowWorkflowGallery(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+                  >
+                    New project
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Overview Tab Content */}
           {activeTab === 'overview' && (
+<<<<<<< Updated upstream
             <div className="px-8 py-6">
               {/* Centered Workspace Icon and Title */}
               <div className="flex flex-col items-center justify-center mb-12 mt-8">
                 <div className="w-32 h-32 rounded-full bg-neutral-700 flex items-center justify-center mb-6 border-4 border-neutral-600">
                   <span className="text-6xl font-semibold text-neutral-300">M</span>
+=======
+            <div className="px-8 py-6 max-w-7xl">
+              {/* Centered Workspace Icon and Title */}
+              <div className="flex flex-col items-center justify-center mb-8">
+                <div className="w-20 h-20 rounded-full bg-neutral-700 flex items-center justify-center mb-4">
+                  <span className="text-3xl font-semibold text-neutral-300">M</span>
+                </div>
+                <h1 className="text-3xl font-semibold mb-2">My workspace</h1>
+              </div>
+
+              {/* Workspace Description and Create Work Button */}
+              <div className="flex items-start justify-between mb-8">
+                <div className="flex-1 max-w-2xl">
+                  <button
+                    onClick={() => {
+                      console.log('Clicking team description button');
+                      setShowTeamSettings(true);
+                    }}
+                    className="text-sm text-neutral-400 hover:text-white"
+                  >
+                    Click to add team description...
+                  </button>
+>>>>>>> Stashed changes
                 </div>
                 <h1 className="text-4xl font-semibold mb-4">My workspace</h1>
                 <button className="text-sm text-neutral-400 hover:text-white">
@@ -160,13 +253,25 @@ export default function Workspace() {
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div className="py-2">
-                          <button className="w-full px-4 py-3 text-left hover:bg-neutral-800 transition-colors flex items-center gap-3">
+                          <button
+                            onClick={() => {
+                              setShowCreateWorkDropdown(false);
+                              setShowWorkflowGallery(true);
+                            }}
+                            className="w-full px-4 py-3 text-left hover:bg-neutral-800 transition-colors flex items-center gap-3"
+                          >
                             <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             <span className="text-sm text-white">New team project</span>
                           </button>
-                          <button className="w-full px-4 py-3 text-left hover:bg-neutral-800 transition-colors flex items-center gap-3">
+                          <button
+                            onClick={() => {
+                              setShowCreateWorkDropdown(false);
+                              setShowNewTemplate(true);
+                            }}
+                            className="w-full px-4 py-3 text-left hover:bg-neutral-800 transition-colors flex items-center gap-3"
+                          >
                             <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
                             </svg>
@@ -302,14 +407,65 @@ export default function Workspace() {
                   </div>
 
                   {/* Description */}
-                  <div className="text-center">
+                  <div className="text-center relative">
                     <p className="text-sm text-neutral-400 mb-4">
                       Organize links to important work such as portfolios, projects,<br />
                       templates, etc. for your team members to find easily.
                     </p>
-                    <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Button
+                      onClick={() => setShowAddWorkMenu(!showAddWorkMenu)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
                       Add work
                     </Button>
+
+                    {/* Add Work Dropdown Menu */}
+                    {showAddWorkMenu && (
+                      <>
+                        {/* Backdrop to close menu */}
+                        <div className="fixed inset-0 z-40" onClick={() => setShowAddWorkMenu(false)}></div>
+
+                        {/* Menu */}
+                        <div
+                          className="absolute left-1/2 transform -translate-x-1/2 bottom-full mb-2 bg-neutral-900 border border-neutral-700 rounded-lg shadow-lg w-80 z-50"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="py-2">
+                            {/* Link existing work */}
+                            <button className="w-full px-4 py-3 text-left hover:bg-neutral-800 transition-colors flex items-start gap-3">
+                              <svg className="w-5 h-5 text-neutral-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                              </svg>
+                              <div>
+                                <div className="text-sm font-medium text-white">Link existing work</div>
+                                <div className="text-xs text-neutral-400 mt-0.5">Portfolios, projects, templates, etc.</div>
+                              </div>
+                            </button>
+
+                            <div className="border-t border-neutral-800 my-1"></div>
+
+                            {/* Link to any work */}
+                            <button className="w-full px-4 py-3 text-left hover:bg-neutral-800 transition-colors flex items-start gap-3">
+                              <svg className="w-5 h-5 text-neutral-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                              </svg>
+                              <span className="text-sm text-white">Link to any work</span>
+                            </button>
+
+                            {/* Attach a file */}
+                            <button className="w-full px-4 py-3 text-left hover:bg-neutral-800 transition-colors flex items-start gap-3">
+                              <svg className="w-5 h-5 text-neutral-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                              </svg>
+                              <div>
+                                <div className="text-sm text-white">Attach a file</div>
+                                <div className="text-xs text-neutral-400 mt-0.5">Upload a file</div>
+                              </div>
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -331,7 +487,10 @@ export default function Workspace() {
                       <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-xs font-bold text-white">
                         p
                       </div>
-                      <button className="w-8 h-8 rounded-full bg-neutral-700 hover:bg-neutral-600 flex items-center justify-center">
+                      <button
+                        onClick={() => setShowInviteMembersDialog(true)}
+                        className="w-8 h-8 rounded-full bg-neutral-700 hover:bg-neutral-600 flex items-center justify-center"
+                      >
                         <Plus className="w-4 h-4 text-neutral-300" />
                       </button>
                     </div>
@@ -341,7 +500,10 @@ export default function Workspace() {
                   <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold">Goals</h3>
-                      <Button className="bg-neutral-800 hover:bg-neutral-700 text-white text-sm">
+                      <Button
+                        onClick={() => setShowCreateGoalDialog(true)}
+                        className="bg-neutral-800 hover:bg-neutral-700 text-white text-sm"
+                      >
                         Create goal
                       </Button>
                     </div>
@@ -501,13 +663,19 @@ export default function Workspace() {
 
                   <div className="space-y-3">
                     {/* New Template Card */}
-                    <div className="border-2 border-dashed border-neutral-700 rounded-lg p-8 flex flex-col items-center justify-center hover:border-neutral-600 cursor-pointer transition-colors">
+                    <div
+                      onClick={() => setShowNewTemplate(true)}
+                      className="border-2 border-dashed border-neutral-700 rounded-lg p-8 flex flex-col items-center justify-center hover:border-neutral-600 cursor-pointer transition-colors"
+                    >
                       <Plus className="w-8 h-8 text-neutral-400 mb-2" />
                       <p className="text-sm text-neutral-300">New Template</p>
                     </div>
 
                     {/* Explore Templates */}
-                    <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 hover:bg-neutral-800/50 transition-colors cursor-pointer">
+                    <div
+                      onClick={() => setShowWorkflowGallery(true)}
+                      className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 hover:bg-neutral-800/50 transition-colors cursor-pointer"
+                    >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-neutral-700 rounded flex items-center justify-center">
                           <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -614,74 +782,106 @@ export default function Workspace() {
 
           {/* Knowledge Tab Content */}
           {activeTab === 'knowledge' && (
-            <div className="flex flex-col items-center justify-center min-h-[500px] px-8">
-              <div className="max-w-2xl text-center">
-                <div className="mb-8 flex justify-center">
-                  <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                </div>
-                <p className="text-neutral-400 mb-6">
-                  Add terms to give teammates shared context while they're collaborating on work in Asana.
-                </p>
+            <div className="px-8 py-6">
+              {/* New Entry Button */}
+              <div className="mb-6">
                 <Button
-                  onClick={() => setShowCreateEntryModal(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 mx-auto"
+                  onClick={handleAddEntry}
+                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
-                  Create entry
+                  New entry
                 </Button>
+              </div>
+
+              {/* Knowledge Entries */}
+              <div className="space-y-4 max-w-4xl">
+                {knowledgeEntries.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="bg-neutral-900 border border-neutral-700 rounded-lg p-6 relative"
+                  >
+                    {/* Three-dot menu */}
+                    <div className="absolute top-4 right-4">
+                      <button
+                        onClick={() => setOpenMenuId(openMenuId === entry.id ? null : entry.id)}
+                        className="p-1 hover:bg-neutral-700 rounded transition-colors"
+                      >
+                        <MoreHorizontal className="w-5 h-5 text-neutral-400" />
+                      </button>
+
+                      {/* Dropdown Menu */}
+                      {openMenuId === entry.id && (
+                        <div className="absolute right-0 mt-1 w-48 bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg z-10">
+                          <button
+                            onClick={() => handleDeleteEntry(entry.id)}
+                            className="w-full px-4 py-2 text-left text-sm text-red-500 hover:bg-neutral-700 rounded-lg transition-colors"
+                          >
+                            Delete entry
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Title Input */}
+                    <input
+                      type="text"
+                      value={entry.title}
+                      onChange={(e) => handleUpdateEntry(entry.id, 'title', e.target.value)}
+                      className="w-full bg-transparent border-none text-xl font-semibold text-white mb-4 focus:outline-none pr-12"
+                      placeholder="Untitled entry"
+                    />
+
+                    {/* Description Label */}
+                    <label className="block text-sm font-medium text-neutral-400 mb-2">
+                      Description
+                    </label>
+
+                    {/* Description Textarea */}
+                    <textarea
+                      value={entry.description}
+                      onChange={(e) => handleUpdateEntry(entry.id, 'description', e.target.value)}
+                      placeholder="Add a description"
+                      className="w-full bg-neutral-800 border border-neutral-700 rounded px-3 py-2 text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 resize-none min-h-[100px]"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           )}
         </main>
       </div>
 
-      {/* Create Knowledge Entry Modal */}
-      {showCreateEntryModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-neutral-900 rounded-lg w-full max-w-3xl mx-4 border border-neutral-700">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800">
-              <div className="flex items-center gap-3">
-                <button className="text-sm text-neutral-400 hover:text-white">Note</button>
-                <span className="text-neutral-600">•</span>
-                <button className="text-sm text-blue-400">New</button>
-              </div>
-              <button
-                onClick={() => setShowCreateEntryModal(false)}
-                className="p-2 hover:bg-neutral-800 rounded"
-              >
-                <X className="w-5 h-5 text-neutral-400" />
-              </button>
-            </div>
+      {/* Team Settings Dialog */}
+      <TeamSettingsDialog open={showTeamSettings} onOpenChange={setShowTeamSettings} />
 
-            {/* Modal Body */}
-            <div className="p-6">
-              {/* Centered Icon and Text */}
-              <div className="flex flex-col items-center justify-center text-center mb-8">
-                <div className="w-24 h-24 bg-blue-600 rounded-lg flex items-center justify-center mb-6">
-                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <p className="text-neutral-400 text-sm max-w-md">
-                  Add terms to give teammates shared context while they're collaborating on work in Asana.
-                </p>
-              </div>
-
-              {/* "Send feedback" link */}
-              <div className="flex justify-center">
-                <button className="text-sm text-blue-400 hover:text-blue-300">
-                  Send feedback
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Workflow Gallery */}
+      {showWorkflowGallery && (
+        <WorkflowGallery
+          onClose={() => setShowWorkflowGallery(false)}
+          onCreateBlankProject={() => {
+            setShowWorkflowGallery(false);
+            // Handle blank project creation here
+          }}
+        />
       )}
+
+      {/* New Template */}
+      {showNewTemplate && (
+        <NewTemplate onClose={() => setShowNewTemplate(false)} />
+      )}
+
+      {/* Create Goal Dialog */}
+      <CreateGoalDialog
+        open={showCreateGoalDialog}
+        onOpenChange={setShowCreateGoalDialog}
+      />
+
+      {/* Invite Members Dialog */}
+      <InviteMembersDialog
+        open={showInviteMembersDialog}
+        onOpenChange={setShowInviteMembersDialog}
+      />
     </div>
   );
 }
