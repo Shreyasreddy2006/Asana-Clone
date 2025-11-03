@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { X, ChevronRight, Upload } from 'lucide-react';
+import { X, Upload, Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { WorkflowCard } from '@/components/WorkflowCard';
 
 interface WorkflowGalleryProps {
   onClose: () => void;
@@ -9,122 +8,39 @@ interface WorkflowGalleryProps {
 }
 
 export default function WorkflowGallery({ onClose, onCreateBlankProject }: WorkflowGalleryProps) {
-  const [activeTab, setActiveTab] = useState('for-you');
+  const [activeTab, setActiveTab] = useState('My organization');
 
   const tabs = [
-    { id: 'for-you', label: 'For you' },
-    { id: 'my-organization', label: 'My organization' },
-    { id: 'marketing', label: 'Marketing' },
-    { id: 'operations', label: 'Operations & PMO' },
-    { id: 'productivity', label: 'Productivity' },
-    { id: 'more', label: 'More' },
-  ];
-
-  const marketingWorkflows = [
-    {
-      title: 'Campaign management by ClassPass',
-      description: 'Plan, schedule, and track complex marketing campaigns with one workflow built to manage deadlines and deliverables.',
-      organization: 'ClassPass',
-      badge: 'Trusted by top teams',
-      color: 'border-l-[4px] border-l-amber-700',
-      bgColor: 'bg-gradient-to-br from-amber-900/20 to-orange-900/10',
-      previewType: 'timeline' as const,
-    },
-    {
-      title: 'Creative requests',
-      description: 'Track creative requests, collect feedback, and manage each production stage to deliver assets on time.',
-      badge: '',
-      color: 'border-l-[4px] border-l-purple-600',
-      bgColor: 'bg-gradient-to-br from-purple-900/20 to-pink-900/10',
-      previewType: 'list' as const,
-    },
-    {
-      title: 'Content calendar by AppLovin',
-      description: 'Track content types, statuses, and channels to manage publishing across teams.',
-      organization: 'AppLovin',
-      badge: 'Trusted by top teams',
-      color: 'border-l-[4px] border-l-pink-600',
-      bgColor: 'bg-gradient-to-br from-pink-900/20 to-rose-900/10',
-      previewType: 'timeline' as const,
-    },
-  ];
-
-  const quickStartWorkflows = [
-    {
-      title: 'Content calendar',
-      description: 'Plan content, organize assets, and view schedules by channel to keep your marketing teams organized.',
-      badge: 'Great for marketing',
-      color: 'border-l-[4px] border-l-purple-500',
-      bgColor: 'bg-gradient-to-br from-purple-900/20 to-pink-900/10',
-      previewType: 'timeline' as const,
-    },
-    {
-      title: 'Project timeline',
-      description: 'Map out dependencies, milestones, and deadlines to keep your projects on track.',
-      badge: 'Great for ops & PMO',
-      color: 'border-l-[4px] border-l-orange-600',
-      bgColor: 'bg-gradient-to-br from-orange-900/20 to-amber-900/10',
-      previewType: 'timeline' as const,
-    },
-    {
-      title: 'Bug tracking',
-      description: 'File, assign, and prioritize bugs in one place to fix issues faster.',
-      badge: 'Great for IT',
-      color: 'border-l-[4px] border-l-green-600',
-      bgColor: 'bg-gradient-to-br from-green-900/20 to-emerald-900/10',
-      previewType: 'list' as const,
-    },
-    {
-      title: 'Cross-functional project plan',
-      description: 'Create tasks, add due dates, and organize work by stage to align teams across your organization.',
-      badge: 'Great for all teams',
-      color: 'border-l-[4px] border-l-pink-500',
-      bgColor: 'bg-gradient-to-br from-pink-900/20 to-purple-900/10',
-      previewType: 'list' as const,
-    },
-    {
-      title: '1:1 Meeting agenda',
-      description: 'Track agenda items, meeting notes, and next steps so you can keep your conversations focused and meaningful.',
-      badge: 'Great for all teams',
-      color: 'border-l-[4px] border-l-rose-500',
-      bgColor: 'bg-gradient-to-br from-rose-900/20 to-pink-900/10',
-      previewType: 'list' as const,
-    },
-    {
-      title: 'Meeting agenda',
-      description: 'Capture agenda items, next steps, and action items to keep meetings focused and productive.',
-      badge: 'Great for all teams',
-      color: 'border-l-[4px] border-l-blue-500',
-      bgColor: 'bg-gradient-to-br from-blue-900/20 to-cyan-900/10',
-      previewType: 'list' as const,
-    },
+    { id: 'For you', label: 'For you' },
+    { id: 'My organization', label: 'My organization' },
+    { id: 'Marketing', label: 'Marketing' },
+    { id: 'Operations & PMO', label: 'Operations & PMO' },
+    { id: 'Productivity', label: 'Productivity' },
+    { id: 'More', label: 'More' },
   ];
 
   return (
-    <div className="fixed inset-0 bg-[#1a1a1a] z-50 overflow-y-auto">
+    <div className="fixed inset-0 bg-[#2b2b2b] z-50 overflow-y-auto">
       {/* Header */}
-      <div className="sticky top-0 bg-[#1a1a1a] border-b border-neutral-800 z-10">
+      <div className="sticky top-0 bg-[#2b2b2b] border-b border-neutral-700 z-10">
         <div className="flex items-center justify-between px-6 py-3">
           <div className="flex items-center gap-4">
             <button
               onClick={onClose}
-              className="p-2 hover:bg-neutral-800 rounded-lg transition-colors"
+              className="p-2 hover:bg-neutral-700 rounded-lg transition-colors"
             >
-              <X className="w-5 h-5 text-neutral-400" />
+              <X className="w-5 h-5 text-neutral-300" />
             </button>
             <h1 className="text-lg font-semibold text-white">Workflow gallery</h1>
-            <span className="px-2 py-0.5 bg-neutral-800 text-neutral-400 text-xs rounded">New</span>
+            <span className="px-2 py-0.5 bg-blue-600 text-white text-xs rounded font-medium">New</span>
           </div>
           <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              className="text-neutral-400 hover:text-white hover:bg-transparent text-sm"
-            >
+            <button className="text-sm text-neutral-300 hover:text-white underline">
               Send feedback
-            </Button>
+            </button>
             <Button
               variant="outline"
-              className="border-neutral-700 text-neutral-300 hover:bg-neutral-800 bg-transparent text-sm"
+              className="border-neutral-600 text-neutral-300 hover:bg-neutral-700 bg-transparent text-sm"
             >
               <Upload className="w-4 h-4 mr-2" />
               Import
@@ -147,7 +63,7 @@ export default function WorkflowGallery({ onClose, onCreateBlankProject }: Workf
               className={`pb-3 px-1 text-sm whitespace-nowrap border-b-2 transition-colors ${
                 activeTab === tab.id
                   ? 'border-blue-500 text-blue-500'
-                  : 'border-transparent text-neutral-500 hover:text-neutral-300'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-300'
               }`}
             >
               {tab.label}
@@ -157,45 +73,69 @@ export default function WorkflowGallery({ onClose, onCreateBlankProject }: Workf
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Marketing Workflows Section */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-2xl font-semibold text-white mb-2">
-                Workflows built for marketing teams
-              </h2>
-              <p className="text-sm text-neutral-400">
-                Help your marketing teams track, plan, and deliver impactful work in Asana
-              </p>
-            </div>
-            <button className="flex items-center gap-1 text-sm text-neutral-400 hover:text-white font-medium">
-              View more
-              <ChevronRight className="w-4 h-4" />
+      <div className="max-w-7xl mx-auto px-8 py-6">
+        {/* Page Title */}
+        <h2 className="text-2xl font-semibold text-white mb-6">My workspace's workflows</h2>
+
+        {/* Toolbar */}
+        <div className="flex items-center justify-between mb-8">
+          <Button className="bg-neutral-700 hover:bg-neutral-600 text-white text-sm flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            Create
+          </Button>
+
+          <div className="flex items-center gap-3">
+            <button className="text-sm text-neutral-300 hover:text-white flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+              Filter
             </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {marketingWorkflows.map((workflow, index) => (
-              <WorkflowCard key={index} {...workflow} />
-            ))}
+
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-neutral-800 rounded border border-neutral-700">
+              <span className="text-sm text-neutral-400">My workspace</span>
+              <svg className="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            <div className="relative">
+              <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Find a template"
+                className="pl-9 pr-4 py-1.5 bg-neutral-800 border border-neutral-700 rounded text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 w-64"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Quick Start Section */}
-        <div className="mb-12">
-          <div className="mb-6">
-            <h2 className="text-2xl font-semibold text-white mb-2">
-              Start working in seconds
-            </h2>
-            <p className="text-sm text-neutral-400">
-              Power your everyday processes with Asana's most popular workflows
-            </p>
+        {/* Empty State */}
+        <div className="flex flex-col items-center justify-center py-20">
+          {/* Canvas Illustration */}
+          <div className="mb-8">
+            <svg width="200" height="150" viewBox="0 0 200 150" fill="none">
+              {/* Easel legs */}
+              <path d="M60 140 L80 80 L90 80 L70 140 Z" fill="#d97598" />
+              <path d="M140 140 L120 80 L110 80 L130 140 Z" fill="#d97598" />
+
+              {/* Easel top */}
+              <rect x="75" y="35" width="50" height="50" fill="#f5f5f5" stroke="#d97598" strokeWidth="3" />
+
+              {/* Paint palette */}
+              <ellipse cx="170" cy="120" rx="15" ry="20" fill="#d97598" />
+              <circle cx="168" cy="115" r="3" fill="#fff" />
+              <circle cx="168" cy="125" r="3" fill="#fff" />
+              <circle cx="173" cy="120" r="3" fill="#fff" />
+            </svg>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {quickStartWorkflows.map((workflow, index) => (
-              <WorkflowCard key={index} {...workflow} />
-            ))}
-          </div>
+
+          <h3 className="text-xl font-semibold text-white mb-2">There's nothing here yet</h3>
+          <p className="text-sm text-neutral-400 mb-6">Looks like no one has created any project templates</p>
+
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+            Create new template
+          </Button>
         </div>
       </div>
     </div>
