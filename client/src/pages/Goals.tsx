@@ -20,6 +20,7 @@ interface Goal {
 }
 
 export default function Goals() {
+  const { sidebarCollapsed } = useUIStore();
 
   const [activeTab, setActiveTab] = useState<'strategy-map' | 'team-goals' | 'my-goals'>('strategy-map');
   const [showViewMenu, setShowViewMenu] = useState(false);

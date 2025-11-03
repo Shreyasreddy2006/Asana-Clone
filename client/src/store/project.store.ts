@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { projectService, Project, CreateProjectData } from '@/services/project.service';
 
 interface ProjectState {
@@ -17,7 +18,9 @@ interface ProjectState {
   clearError: () => void;
 }
 
-export const useProjectStore = create<ProjectState>((set) => ({
+export const useProjectStore = create<ProjectState>()(
+  persist(
+    (set) => ({
   projects: [],
   currentProject: null,
   isLoading: false,
@@ -127,4 +130,13 @@ export const useProjectStore = create<ProjectState>((set) => ({
   },
 
   clearError: () => set({ error: null }),
-}));
+    }),
+    {
+      name: 'project-storage',
+      partialize: (state) => ({
+        projects: state.projects,
+        currentProject: state.currentProject,
+      }),
+    }
+  )
+);
