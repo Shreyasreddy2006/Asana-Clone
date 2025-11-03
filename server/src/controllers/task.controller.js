@@ -299,7 +299,7 @@ const updateTask = async (req, res) => {
       await notifyTaskAssignment(task, req.user._id, req.body.assignee);
     }
 
-    await task.save();
+    await task.save({ validateModifiedOnly: true });
 
     // Update project completion count if status changed
     if (oldStatus !== task.status) {
@@ -431,7 +431,7 @@ const addSubtask = async (req, res) => {
       title,
       order: task.subtasks.length,
     });
-    await task.save();
+    await task.save({ validateModifiedOnly: true });
 
     // Log activity
     await logActivity({
@@ -497,7 +497,7 @@ const updateSubtask = async (req, res) => {
       }
     }
 
-    await task.save();
+    await task.save({ validateModifiedOnly: true });
 
     // Emit to project
     emitToProject(task.project, 'subtask-updated', {
@@ -532,7 +532,7 @@ const deleteSubtask = async (req, res) => {
     }
 
     task.subtasks.pull(req.params.subtaskId);
-    await task.save();
+    await task.save({ validateModifiedOnly: true });
 
     // Emit to project
     emitToProject(task.project, 'subtask-deleted', {
@@ -578,7 +578,7 @@ const addComment = async (req, res) => {
 
     // Update task comment count
     task.commentCount += 1;
-    await task.save();
+    await task.save({ validateModifiedOnly: true });
 
     // Send notifications
     if (mentions && mentions.length > 0) {
@@ -712,7 +712,7 @@ const deleteComment = async (req, res) => {
     const task = await Task.findById(comment.task);
     if (task) {
       task.commentCount -= 1;
-      await task.save();
+      await task.save({ validateModifiedOnly: true });
     }
 
     await comment.deleteOne();
@@ -826,7 +826,7 @@ const addFollower = async (req, res) => {
 
     if (!task.followers.includes(userId)) {
       task.followers.push(userId);
-      await task.save();
+      await task.save({ validateModifiedOnly: true });
     }
 
     const populatedTask = await Task.findById(task._id).populate(
@@ -861,7 +861,7 @@ const removeFollower = async (req, res) => {
     }
 
     task.followers.pull(req.params.userId);
-    await task.save();
+    await task.save({ validateModifiedOnly: true });
 
     res.json({
       success: true,
@@ -911,8 +911,8 @@ const addDependency = async (req, res) => {
       }
     }
 
-    await task.save();
-    await dependentTask.save();
+    await task.save({ validateModifiedOnly: true });
+    await dependentTask.save({ validateModifiedOnly: true });
 
     const populatedTask = await Task.findById(task._id)
       .populate('dependencies.blockedBy', 'title status')
@@ -949,13 +949,13 @@ const removeDependency = async (req, res) => {
     // Remove from both sides
     task.dependencies.blockedBy.pull(dependencyId);
     task.dependencies.blocking.pull(dependencyId);
-    await task.save();
+    await task.save({ validateModifiedOnly: true });
 
     const dependentTask = await Task.findById(dependencyId);
     if (dependentTask) {
       dependentTask.dependencies.blockedBy.pull(task._id);
       dependentTask.dependencies.blocking.pull(task._id);
-      await dependentTask.save();
+      await dependentTask.save({ validateModifiedOnly: true });
     }
 
     res.json({
