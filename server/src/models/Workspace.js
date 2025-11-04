@@ -61,6 +61,22 @@ const workspaceSchema = new mongoose.Schema(
         default: [1, 2, 3, 4, 5], // Monday to Friday
       },
     },
+    pendingInvitations: [
+      {
+        email: {
+          type: String,
+          required: true,
+        },
+        invitedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+        },
+        invitedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

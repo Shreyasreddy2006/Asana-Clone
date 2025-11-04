@@ -11,6 +11,7 @@ const {
   updateMemberRole,
   createTeam,
   getTeams,
+  sendInvitations,
 } = require('../controllers/workspace.controller');
 const { protect } = require('../middleware/auth');
 
@@ -28,6 +29,8 @@ router
 router.post('/:id/members', inviteMember);
 router.delete('/:id/members/:userId', removeMember);
 router.put('/:id/members/:userId', updateMemberRole);
+
+router.post('/:id/invite', sendInvitations);
 
 router.route('/:id/teams').get(getTeams).post(createTeam);
 
