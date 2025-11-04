@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { Project } from '@/services/project.service';
+import { Project, projectService } from '@/services/project.service';
 import { Task } from '@/services/task.service';
-import { Plus, TrendingUp, AlertTriangle, CheckCircle2, Target, FolderKanban, FileText, Pencil } from 'lucide-react';
+import { Plus, TrendingUp, AlertTriangle, CheckCircle2, Target, FolderKanban, FileText, Pencil, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface OverviewTabProps {
   project: Project;
@@ -13,6 +16,17 @@ interface OverviewTabProps {
 export default function OverviewTab({ project, tasks }: OverviewTabProps) {
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [description, setDescription] = useState(project.description || '');
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [isAddMilestoneOpen, setIsAddMilestoneOpen] = useState(false);
+  const [isAddResourceOpen, setIsAddResourceOpen] = useState(false);
+  const [memberEmail, setMemberEmail] = useState('');
+  const [memberRole, setMemberRole] = useState<'editor' | 'viewer' | 'owner'>('editor');
+  const [milestoneName, setMilestoneName] = useState('');
+  const [milestoneDate, setMilestoneDate] = useState('');
+  const [resourceName, setResourceName] = useState('');
+  const [resourceUrl, setResourceUrl] = useState('');
+  const [milestones, setMilestones] = useState<Array<{ id: string; name: string; date: string }>>([]);
+  const [resources, setResources] = useState<Array<{ id: string; name: string; url: string }>>([]);
 
   // Calculate project statistics
   const completedTasks = tasks.filter(t => t.status === 'completed').length;
@@ -81,6 +95,74 @@ export default function OverviewTab({ project, tasks }: OverviewTabProps) {
   const handleSaveDescription = () => {
     toast.info('Description saved!');
     setIsEditingDescription(false);
+  };
+
+  const handleAddMember = async () => {
+    if (!memberEmail.trim()) {
+      toast.error('Please enter an email address');
+      return;
+    }
+
+    try {
+      await projectService.addMember(project._id, { 
+        userId: memberEmail, 
+        role: memberRole 
+      });
+      toast.success(`Member added with ${memberRole} role`);
+      setMemberEmail('');
+      setMemberRole('editor');
+      setIsAddMemberOpen(false);
+    } catch (error) {
+      toast.error('Failed to add member');
+    }
+  };
+
+  const handleAddMilestone = () => {
+    if (!milestoneName.trim() || !milestoneDate) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    const newMilestone = {
+      id: Date.now().toString(),
+      name: milestoneName,
+      date: milestoneDate,
+    };
+
+    setMilestones([...milestones, newMilestone]);
+    toast.success('Milestone added');
+    setMilestoneName('');
+    setMilestoneDate('');
+    setIsAddMilestoneOpen(false);
+  };
+
+  const handleAddResource = () => {
+    if (!resourceName.trim() || !resourceUrl.trim()) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    const newResource = {
+      id: Date.now().toString(),
+      name: resourceName,
+      url: resourceUrl,
+    };
+
+    setResources([...resources, newResource]);
+    toast.success('Resource added');
+    setResourceName('');
+    setResourceUrl('');
+    setIsAddResourceOpen(false);
+  };
+
+  const handleRemoveResource = (id: string) => {
+    setResources(resources.filter(r => r.id !== id));
+    toast.success('Resource removed');
+  };
+
+  const handleRemoveMilestone = (id: string) => {
+    setMilestones(milestones.filter(m => m.id !== id));
+    toast.success('Milestone removed');
   };
 
   return (
@@ -228,7 +310,7 @@ export default function OverviewTab({ project, tasks }: OverviewTabProps) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-white">Project roles</h3>
             <button
-              onClick={() => toast.info('Add member feature coming soon!')}
+              onClick={() => setIsAddMemberOpen(true)}
               className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
             >
               + Add
@@ -271,25 +353,50 @@ export default function OverviewTab({ project, tasks }: OverviewTabProps) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-white">Milestones</h3>
             <button
-              onClick={() => toast.info('Add milestone feature coming soon!')}
+              onClick={() => setIsAddMilestoneOpen(true)}
               className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
             >
               + Add
             </button>
           </div>
           <div className="space-y-3">
-            {project.dueDate ? (
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
-                  <Target className="w-4 h-4 text-green-500" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm text-neutral-200">Project completion</div>
-                  <div className="text-xs text-neutral-500">
-                    Due {format(new Date(project.dueDate), 'MMM d, yyyy')}
+            {milestones.length > 0 || project.dueDate ? (
+              <>
+                {project.dueDate && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                      <Target className="w-4 h-4 text-green-500" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm text-neutral-200">Project completion</div>
+                      <div className="text-xs text-neutral-500">
+                        Due {format(new Date(project.dueDate), 'MMM d, yyyy')}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                )}
+                {milestones.map(milestone => (
+                  <div key={milestone.id} className="flex items-start justify-between">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                        <Target className="w-4 h-4 text-blue-500" />
+                      </div>
+                      <div>
+                        <div className="text-sm text-neutral-200">{milestone.name}</div>
+                        <div className="text-xs text-neutral-500">
+                          Due {format(new Date(milestone.date), 'MMM d, yyyy')}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveMilestone(milestone.id)}
+                      className="text-neutral-500 hover:text-red-400 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </>
             ) : (
               <p className="text-sm text-neutral-500">No milestones yet</p>
             )}
@@ -303,7 +410,7 @@ export default function OverviewTab({ project, tasks }: OverviewTabProps) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-white">Connected goals</h3>
             <button
-              onClick={() => toast.info('Connect goals feature coming soon!')}
+              onClick={() => toast.info('Connect goals to projects coming soon!')}
               className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
             >
               + Connect
@@ -324,7 +431,7 @@ export default function OverviewTab({ project, tasks }: OverviewTabProps) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-white">Connected portfolios</h3>
             <button
-              onClick={() => toast.info('Connect portfolio feature coming soon!')}
+              onClick={() => toast.info('Connect projects to portfolios coming soon!')}
               className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
             >
               + Connect
@@ -346,24 +453,191 @@ export default function OverviewTab({ project, tasks }: OverviewTabProps) {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm font-semibold text-white">Key resources</h3>
           <button
-            onClick={() => toast.info('Add resource feature coming soon!')}
+            onClick={() => setIsAddResourceOpen(true)}
             className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
           >
             + Add
           </button>
         </div>
-        <div className="flex flex-col items-center justify-center py-8">
-          <div className="w-12 h-12 rounded-lg bg-neutral-800 flex items-center justify-center mb-3">
-            <FileText className="w-6 h-6 text-neutral-600" />
+        {resources.length > 0 ? (
+          <div className="space-y-3">
+            {resources.map((resource) => (
+              <div key={resource.id} className="flex items-start justify-between p-3 bg-neutral-800/30 rounded border border-neutral-700/50">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                    <FileText className="w-4 h-4 text-blue-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <a
+                      href={resource.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-400 hover:text-blue-300 truncate block"
+                    >
+                      {resource.name}
+                    </a>
+                    <p className="text-xs text-neutral-500 truncate">{resource.url}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleRemoveResource(resource.id)}
+                  className="text-neutral-500 hover:text-red-400 transition-colors ml-2"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
           </div>
-          <p className="text-sm text-neutral-500 text-center mb-2">
-            Add links to key documents and resources
-          </p>
-          <p className="text-xs text-neutral-600 text-center max-w-md">
-            Keep important project files, docs, and links easily accessible for your team
-          </p>
-        </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="w-12 h-12 rounded-lg bg-neutral-800 flex items-center justify-center mb-3">
+              <FileText className="w-6 h-6 text-neutral-600" />
+            </div>
+            <p className="text-sm text-neutral-500 text-center mb-2">
+              Add links to key documents and resources
+            </p>
+            <p className="text-xs text-neutral-600 text-center max-w-md">
+              Keep important project files, docs, and links easily accessible for your team
+            </p>
+          </div>
+        )}
       </div>
+
+      {/* Add Member Dialog */}
+      <Dialog open={isAddMemberOpen} onOpenChange={setIsAddMemberOpen}>
+        <DialogContent className="bg-neutral-900 border-neutral-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Add team member</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs text-neutral-400 block mb-2">Email address</label>
+              <Input
+                value={memberEmail}
+                onChange={(e) => setMemberEmail(e.target.value)}
+                placeholder="member@example.com"
+                className="bg-neutral-800 border-neutral-700 text-white"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-neutral-400 block mb-2">Role</label>
+              <select
+                value={memberRole}
+                onChange={(e) => setMemberRole(e.target.value as 'editor' | 'viewer' | 'owner')}
+                className="w-full px-3 py-2 bg-neutral-800 border border-neutral-700 text-white rounded-md text-sm"
+              >
+                <option value="viewer">Viewer</option>
+                <option value="editor">Editor</option>
+                <option value="owner">Owner</option>
+              </select>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button
+                onClick={() => setIsAddMemberOpen(false)}
+                variant="outline"
+                className="border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddMember}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Add Member
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Milestone Dialog */}
+      <Dialog open={isAddMilestoneOpen} onOpenChange={setIsAddMilestoneOpen}>
+        <DialogContent className="bg-neutral-900 border-neutral-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Add milestone</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs text-neutral-400 block mb-2">Milestone name</label>
+              <Input
+                value={milestoneName}
+                onChange={(e) => setMilestoneName(e.target.value)}
+                placeholder="e.g., Design complete, Beta launch"
+                className="bg-neutral-800 border-neutral-700 text-white"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-neutral-400 block mb-2">Due date</label>
+              <Input
+                type="date"
+                value={milestoneDate}
+                onChange={(e) => setMilestoneDate(e.target.value)}
+                className="bg-neutral-800 border-neutral-700 text-white"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button
+                onClick={() => setIsAddMilestoneOpen(false)}
+                variant="outline"
+                className="border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddMilestone}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Add Milestone
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Resource Dialog */}
+      <Dialog open={isAddResourceOpen} onOpenChange={setIsAddResourceOpen}>
+        <DialogContent className="bg-neutral-900 border-neutral-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Add resource</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs text-neutral-400 block mb-2">Resource name</label>
+              <Input
+                value={resourceName}
+                onChange={(e) => setResourceName(e.target.value)}
+                placeholder="e.g., Design System, API Docs"
+                className="bg-neutral-800 border-neutral-700 text-white"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-neutral-400 block mb-2">URL</label>
+              <Input
+                type="url"
+                value={resourceUrl}
+                onChange={(e) => setResourceUrl(e.target.value)}
+                placeholder="https://example.com"
+                className="bg-neutral-800 border-neutral-700 text-white"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button
+                onClick={() => setIsAddResourceOpen(false)}
+                variant="outline"
+                className="border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddResource}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Add Resource
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
