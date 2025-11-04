@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { Task } from '@/services/task.service';
-import { Project, ProjectSection } from '@/services/project.service';
-import { Plus, Calendar, User } from 'lucide-react';
+import { Project, ProjectSection, projectService } from '@/services/project.service';
+import { Plus, Calendar, User, MoreHorizontal, Trash2, Edit2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   DndContext,
   DragEndEvent,
@@ -146,6 +149,11 @@ export default function BoardView({ project, tasks, onUpdateTask, onCreateTask }
   const [activeId, setActiveId] = useState<string | null>(null);
   const [addingTaskToSection, setAddingTaskToSection] = useState<string | null>(null);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
+  const [newSectionName, setNewSectionName] = useState('');
+  const [sectionOptionsOpen, setSectionOptionsOpen] = useState<string | null>(null);
+  const [isRenamingSectionId, setIsRenamingSectionId] = useState<string | null>(null);
+  const [renamingValue, setRenamingValue] = useState('');
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -222,6 +230,56 @@ export default function BoardView({ project, tasks, onUpdateTask, onCreateTask }
     }
   };
 
+  const handleAddSection = async () => {
+    if (!newSectionName.trim()) {
+      toast.error('Please enter a section name');
+      return;
+    }
+
+    try {
+      await projectService.addSection(project._id, {
+        name: newSectionName.trim(),
+        order: (project.sections?.length || 0) + 1,
+      });
+      toast.success('Section created');
+      setNewSectionName('');
+      setIsAddSectionOpen(false);
+    } catch (error) {
+      toast.error('Failed to create section');
+    }
+  };
+
+  const handleRenameSection = async (sectionId: string) => {
+    if (!renamingValue.trim()) {
+      toast.error('Please enter a section name');
+      return;
+    }
+
+    try {
+      await projectService.updateSection(project._id, sectionId, { name: renamingValue.trim() });
+      toast.success('Section renamed');
+      setIsRenamingSectionId(null);
+      setRenamingValue('');
+      setSectionOptionsOpen(null);
+    } catch (error) {
+      toast.error('Failed to rename section');
+    }
+  };
+
+  const handleDeleteSection = async (sectionId: string) => {
+    if (!window.confirm('Are you sure you want to delete this section?')) {
+      return;
+    }
+
+    try {
+      await projectService.deleteSection(project._id, sectionId);
+      toast.success('Section deleted');
+      setSectionOptionsOpen(null);
+    } catch (error) {
+      toast.error('Failed to delete section');
+    }
+  };
+
   const activeTask = activeId ? tasks.find(t => t._id === activeId) : null;
 
   return (
@@ -245,17 +303,54 @@ export default function BoardView({ project, tasks, onUpdateTask, onCreateTask }
               {/* Section Header */}
               <div className="p-4 border-b border-neutral-800">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-neutral-200">
-                    {section.name} <span className="text-neutral-500 font-normal">{sectionTasks.length}</span>
-                  </h3>
-                  <button
-                    onClick={() => toast.info('Section options coming soon!')}
-                    className="text-neutral-500 hover:text-neutral-300 transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                    </svg>
-                  </button>
+                  {isRenamingSectionId === sectionId ? (
+                    <input
+                      autoFocus
+                      type="text"
+                      value={renamingValue}
+                      onChange={(e) => setRenamingValue(e.target.value)}
+                      onBlur={() => handleRenameSection(sectionId)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleRenameSection(sectionId);
+                        if (e.key === 'Escape') setIsRenamingSectionId(null);
+                      }}
+                      className="flex-1 bg-neutral-800 text-white text-sm font-semibold border border-neutral-700 rounded px-2 py-1"
+                    />
+                  ) : (
+                    <h3 className="text-sm font-semibold text-neutral-200">
+                      {section.name} <span className="text-neutral-500 font-normal">{sectionTasks.length}</span>
+                    </h3>
+                  )}
+                  <div className="relative">
+                    <button
+                      onClick={() => setSectionOptionsOpen(sectionOptionsOpen === sectionId ? null : sectionId)}
+                      className="text-neutral-500 hover:text-neutral-300 transition-colors ml-2"
+                    >
+                      <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                    {sectionOptionsOpen === sectionId && (
+                      <div className="absolute right-0 mt-1 w-40 bg-neutral-800 border border-neutral-700 rounded-lg shadow-lg z-10">
+                        <button
+                          onClick={() => {
+                            setIsRenamingSectionId(sectionId);
+                            setRenamingValue(section.name);
+                            setSectionOptionsOpen(null);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-700 transition-colors rounded-t-lg"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                          Rename
+                        </button>
+                        <button
+                          onClick={() => handleDeleteSection(sectionId)}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors rounded-b-lg"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -328,7 +423,7 @@ export default function BoardView({ project, tasks, onUpdateTask, onCreateTask }
         {/* Add Section Button */}
         <div className="flex-shrink-0 w-80">
           <button
-            onClick={() => toast.info('Add section feature coming soon!')}
+            onClick={() => setIsAddSectionOpen(true)}
             className="w-full h-32 bg-neutral-900/50 border-2 border-dashed border-neutral-800 rounded-lg flex flex-col items-center justify-center gap-2 text-neutral-500 hover:text-neutral-300 hover:border-neutral-700 transition-colors"
           >
             <Plus className="w-5 h-5" />
@@ -348,6 +443,41 @@ export default function BoardView({ project, tasks, onUpdateTask, onCreateTask }
           </div>
         )}
       </DragOverlay>
+
+      {/* Add Section Dialog */}
+      <Dialog open={isAddSectionOpen} onOpenChange={setIsAddSectionOpen}>
+        <DialogContent className="bg-neutral-900 border-neutral-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Create new section</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs text-neutral-400 block mb-2">Section name</label>
+              <Input
+                value={newSectionName}
+                onChange={(e) => setNewSectionName(e.target.value)}
+                placeholder="e.g., To Do, In Progress, Done"
+                className="bg-neutral-800 border-neutral-700 text-white"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button
+                onClick={() => setIsAddSectionOpen(false)}
+                variant="outline"
+                className="border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddSection}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Create Section
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DndContext>
   );
 }
