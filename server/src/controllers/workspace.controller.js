@@ -575,6 +575,144 @@ const getTeams = async (req, res) => {
   }
 };
 
+// @desc    Send bulk invitations to workspace
+// @route   POST /api/workspaces/:id/invite
+// @access  Private
+const sendInvitations = async (req, res) => {
+  try {
+    const { emails } = req.body;
+
+    const workspace = await Workspace.findById(req.params.id);
+
+    if (!workspace) {
+      return res.status(404).json({
+        success: false,
+        message: 'Workspace not found',
+      });
+    }
+
+    // Check if user has permission
+    const member = workspace.members.find(
+      (m) => m.user.toString() === req.user._id.toString()
+    );
+
+    if (!member || !['owner', 'admin'].includes(member.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to send invitations',
+      });
+    }
+
+    if (!Array.isArray(emails) || emails.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide at least one email',
+      });
+    }
+
+    const invitationResults = [];
+    const sentEmails = [];
+
+    for (const email of emails) {
+      if (!email || typeof email !== 'string') continue;
+
+      const trimmedEmail = email.trim().toLowerCase();
+
+      // Check if user already exists
+      const existingUser = await User.findOne({ email: trimmedEmail });
+
+      if (existingUser) {
+        // Check if already a member
+        const isMember = workspace.members.some(
+          (m) => m.user.toString() === existingUser._id.toString()
+        );
+
+        if (isMember) {
+          invitationResults.push({
+            email: trimmedEmail,
+            status: 'already_member',
+            message: 'User is already a member',
+          });
+          continue;
+        }
+
+        // Add as member directly
+        workspace.members.push({
+          user: existingUser._id,
+          role: 'member',
+        });
+        existingUser.workspaces.push(workspace._id);
+        await existingUser.save();
+
+        invitationResults.push({
+          email: trimmedEmail,
+          status: 'added',
+          message: 'User added to workspace',
+        });
+        sentEmails.push(trimmedEmail);
+      } else {
+        // For new users, store pending invitation
+        if (!workspace.pendingInvitations) {
+          workspace.pendingInvitations = [];
+        }
+
+        const existingInvite = workspace.pendingInvitations.find(
+          (inv) => inv.email === trimmedEmail
+        );
+
+        if (!existingInvite) {
+          workspace.pendingInvitations.push({
+            email: trimmedEmail,
+            invitedBy: req.user._id,
+            invitedAt: new Date(),
+          });
+        }
+
+        invitationResults.push({
+          email: trimmedEmail,
+          status: 'invited',
+          message: 'Invitation sent',
+        });
+        sentEmails.push(trimmedEmail);
+      }
+    }
+
+    await workspace.save();
+
+    // Log activity
+    await logActivity({
+      user: req.user._id,
+      workspace: workspace._id,
+      action: 'invitations_sent',
+      description: `Sent invitations to ${sentEmails.length} email${sentEmails.length !== 1 ? 's' : ''}`,
+      metadata: { emails: sentEmails, totalInvitations: emails.length },
+    });
+
+    // Emit to workspace
+    emitToWorkspace(workspace._id, 'invitations-sent', {
+      workspace: workspace._id,
+      invitations: invitationResults,
+    });
+
+    const populatedWorkspace = await Workspace.findById(workspace._id)
+      .populate('owner', 'name email avatar')
+      .populate('members.user', 'name email avatar');
+
+    res.json({
+      success: true,
+      message: `Sent invitations to ${sentEmails.length} teammate${sentEmails.length !== 1 ? 's' : ''}`,
+      workspace: populatedWorkspace,
+      invitations: invitationResults,
+    });
+  } catch (error) {
+    console.error('Send invitations error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error',
+    });
+  }
+};
+
 module.exports = {
   getWorkspaces,
   getWorkspace,
@@ -586,4 +724,5 @@ module.exports = {
   updateMemberRole,
   createTeam,
   getTeams,
+  sendInvitations,
 };

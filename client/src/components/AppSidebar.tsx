@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useProjectStore } from "@/store/project.store";
 import { useWorkspaceStore } from "@/store/workspace.store";
 import { useUIStore } from "@/store/ui.store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import InviteTeammatesDialog from "./InviteTeammatesDialog";
 
 export function AppSidebar() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export function AppSidebar() {
   const { projects, fetchProjects } = useProjectStore();
   const { currentWorkspace } = useWorkspaceStore();
   const { sidebarCollapsed } = useUIStore();
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   // Fetch projects when workspace changes
   useEffect(() => {
@@ -145,11 +147,16 @@ export function AppSidebar() {
         </button>
 
         {/* Invite Teammates */}
-        <button className="w-full flex items-center gap-2 px-2 py-1 text-xs text-neutral-400 hover:text-white transition-colors">
+        <button
+          onClick={() => setInviteOpen(true)}
+          className="w-full flex items-center gap-2 px-2 py-1 text-xs text-neutral-400 hover:text-white transition-colors"
+        >
           <Mail className="w-3 h-3" />
           <span>Invite teammates</span>
         </button>
       </div>
+
+      <InviteTeammatesDialog open={inviteOpen} onOpenChange={setInviteOpen} />
     </aside>
   );
 }
