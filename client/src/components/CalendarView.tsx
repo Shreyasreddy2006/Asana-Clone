@@ -3,6 +3,9 @@ import { Task } from '@/services/task.service';
 import { Project } from '@/services/project.service';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import {
   format,
   startOfMonth,
@@ -26,6 +29,9 @@ interface CalendarViewProps {
 export default function CalendarView({ project, tasks, onUpdateTask }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [newTaskName, setNewTaskName] = useState('');
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -68,7 +74,19 @@ export default function CalendarView({ project, tasks, onUpdateTask }: CalendarV
   };
 
   const handleDayClick = (day: Date) => {
-    toast.info(`Selected ${format(day, 'MMM d, yyyy')}`);
+    setSelectedDate(day);
+    setIsAddTaskOpen(true);
+  };
+
+  const handleAddTask = () => {
+    if (!newTaskName.trim() || !selectedDate) {
+      toast.error('Please enter a task name');
+      return;
+    }
+
+    toast.success(`Task added for ${format(selectedDate, 'MMM d')}`);
+    setNewTaskName('');
+    setIsAddTaskOpen(false);
   };
 
   return (
@@ -215,6 +233,43 @@ export default function CalendarView({ project, tasks, onUpdateTask }: CalendarV
           <span>Default</span>
         </div>
       </div>
+
+      {/* Add Task Dialog */}
+      <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
+        <DialogContent className="bg-neutral-900 border-neutral-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">
+              Add task for {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'today'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs text-neutral-400 block mb-2">Task name</label>
+              <Input
+                value={newTaskName}
+                onChange={(e) => setNewTaskName(e.target.value)}
+                placeholder="Enter task name"
+                className="bg-neutral-800 border-neutral-700 text-white"
+              />
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button
+                onClick={() => setIsAddTaskOpen(false)}
+                variant="outline"
+                className="border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddTask}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Add Task
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
