@@ -44,7 +44,6 @@ export default function Goals() {
   const [parentGoalId, setParentGoalId] = useState<string | null>(null);
   const [showTimePeriodMenu, setShowTimePeriodMenu] = useState(false);
   const [selectedTimePeriod, setSelectedTimePeriod] = useState('All');
-  const { sidebarCollapsed, toggleSidebar } = useUIStore();
   
   const handleSaveGoal = () => {
     const newGoal: Goal = {
