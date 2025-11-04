@@ -19,9 +19,21 @@ interface Goal {
   children: string[];
 }
 
-export default function Goals() {
-  const { sidebarCollapsed } = useUIStore();
+interface Goal {
+  id: string;
+  title: string;
+  owner: string;
+  timePeriod: string;
+  workspace: string;
+  progress: number;
+  members: string;
+  parentId: string | null;
+  children: string[];
+}
 
+export default function Goals() {
+
+  const { sidebarCollapsed } = useUIStore();
   const [activeTab, setActiveTab] = useState<'strategy-map' | 'team-goals' | 'my-goals'>('strategy-map');
   const [showViewMenu, setShowViewMenu] = useState(false);
   const [isCreateGoalOpen, setIsCreateGoalOpen] = useState(false);
