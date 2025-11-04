@@ -1,8 +1,16 @@
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { X, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'sonner';
+
+interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'member' | 'guest';
+}
 
 interface TeamSettingsDialogProps {
   open: boolean;
@@ -15,8 +23,40 @@ export default function TeamSettingsDialog({ open, onOpenChange }: TeamSettingsD
   const [description, setDescription] = useState('');
   const [isEndorsed, setIsEndorsed] = useState(true);
   const [privacy, setPrivacy] = useState('request');
+  const [members, setMembers] = useState<TeamMember[]>([
+    { id: '1', name: 'John Doe', email: 'john@example.com', role: 'admin' },
+    { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'member' },
+  ]);
+  const [newMemberEmail, setNewMemberEmail] = useState('');
+  const [newMemberRole, setNewMemberRole] = useState<'admin' | 'member' | 'guest'>('member');
 
-  console.log('TeamSettingsDialog open:', open);
+  const handleAddMember = () => {
+    if (!newMemberEmail.trim()) {
+      toast.error('Please enter an email');
+      return;
+    }
+
+    const newMember: TeamMember = {
+      id: Date.now().toString(),
+      name: newMemberEmail.split('@')[0],
+      email: newMemberEmail,
+      role: newMemberRole,
+    };
+
+    setMembers([...members, newMember]);
+    setNewMemberEmail('');
+    toast.success('Member added to team');
+  };
+
+  const handleRemoveMember = (id: string) => {
+    setMembers(members.filter(m => m.id !== id));
+    toast.success('Member removed from team');
+  };
+
+  const handleRoleChange = (id: string, newRole: 'admin' | 'member' | 'guest') => {
+    setMembers(members.map(m => m.id === id ? { ...m, role: newRole } : m));
+    toast.success('Member role updated');
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -233,8 +273,79 @@ export default function TeamSettingsDialog({ open, onOpenChange }: TeamSettingsD
           )}
 
           {activeTab === 'members' && (
-            <div className="text-center py-12 text-neutral-400">
-              <p>Members management coming soon...</p>
+            <div className="space-y-6">
+              {/* Add Member Section */}
+              <div className="bg-neutral-800/50 border border-neutral-700 rounded-lg p-4">
+                <h3 className="text-sm font-semibold text-white mb-3">Add new member</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-neutral-400 block mb-1">Email</label>
+                    <Input
+                      type="email"
+                      value={newMemberEmail}
+                      onChange={(e) => setNewMemberEmail(e.target.value)}
+                      placeholder="member@example.com"
+                      className="bg-neutral-700 border-neutral-600 text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-neutral-400 block mb-1">Role</label>
+                    <select
+                      value={newMemberRole}
+                      onChange={(e) => setNewMemberRole(e.target.value as 'admin' | 'member' | 'guest')}
+                      className="w-full px-3 py-2 bg-neutral-700 border border-neutral-600 text-white rounded-md text-sm"
+                    >
+                      <option value="guest">Guest</option>
+                      <option value="member">Member</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                  <Button
+                    onClick={handleAddMember}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Member
+                  </Button>
+                </div>
+              </div>
+
+              {/* Members List */}
+              <div>
+                <h3 className="text-sm font-semibold text-white mb-3">Team members ({members.length})</h3>
+                <div className="space-y-2">
+                  {members.map(member => (
+                    <div key={member.id} className="flex items-center justify-between bg-neutral-800/30 border border-neutral-700 rounded-lg p-3">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-xs font-semibold text-white flex-shrink-0">
+                          {member.name[0].toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm text-white">{member.name}</div>
+                          <div className="text-xs text-neutral-400">{member.email}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-2">
+                        <select
+                          value={member.role}
+                          onChange={(e) => handleRoleChange(member.id, e.target.value as 'admin' | 'member' | 'guest')}
+                          className="px-2 py-1 bg-neutral-700 border border-neutral-600 text-white rounded text-xs"
+                        >
+                          <option value="guest">Guest</option>
+                          <option value="member">Member</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                        <button
+                          onClick={() => handleRemoveMember(member.id)}
+                          className="p-1.5 text-neutral-500 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
