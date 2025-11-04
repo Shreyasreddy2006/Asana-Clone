@@ -20,6 +20,7 @@ import PortfolioSetup from "./pages/PortfolioSetup";
 import PortfolioDetail from "./pages/PortfolioDetail";
 import DashboardDetail from "./pages/DashboardDetail";
 import Workflow from "./pages/Workflow";
+import Workspace from "./pages/Workspace";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -147,10 +148,10 @@ const App = () => (
             }
           />
           <Route
-            path="/workspace"
+            path="/workspace/*"
             element={
               <ProtectedRoute>
-                <Workflow />
+                <Workspace />
               </ProtectedRoute>
             }
           />
