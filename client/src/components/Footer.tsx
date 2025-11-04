@@ -92,11 +92,7 @@ const Footer = () => {
           <div className="border-t border-white/20 pt-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
               <div className="flex items-center gap-3">
-                <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="50" cy="28" r="18" fill="#F06A6A"/>
-                  <circle cx="28" cy="62" r="18" fill="#F06A6A"/>
-                  <circle cx="72" cy="62" r="18" fill="#F06A6A"/>
-                </svg>
+                <img src="/asana-logo.png" alt="Asana" width="32" height="32" className="w-8 h-8 object-contain" />
               </div>
 
               <div className="flex items-center gap-4">
