@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
 package-lock.json
+.pnp/
+.pnp.js
 
 # Environment files
 .env
@@ -11,15 +13,17 @@ package-lock.json
 dist/
 build/
 *.tgz
-
-# Downloaded files
 *.dmg
+*.tar.gz
+*.zip
 
-# IDE
+# IDE and Editor files
 .idea/
 .vscode/
 *.swp
 *.swo
+*.sublime-*
+.DS_Store
 
 # OS
 .DS_Store
