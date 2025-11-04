@@ -6,9 +6,11 @@ import { format } from 'date-fns';
 
 interface MessagesViewProps {
   project: Project;
+  /** When false, hide the top header/info panel used when MessagesView is shown as a standalone project page. Default: true */
+  showHeader?: boolean;
 }
 
-export default function MessagesView({ project }: MessagesViewProps) {
+export default function MessagesView({ project, showHeader = true }: MessagesViewProps) {
   const [message, setMessage] = useState('');
   const [messages] = useState([
     {
@@ -45,37 +47,39 @@ export default function MessagesView({ project }: MessagesViewProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header Info */}
-      <div className="mb-6 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-6">
-        <div className="flex items-start gap-3 mb-4">
-          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
-            <Mail className="w-6 h-6 text-white" />
-          </div>
-          <div className="flex-1">
-            <h3 className="text-base font-semibold text-white mb-1">
-              Connect your words to your work
-            </h3>
-            <p className="text-sm text-neutral-300 leading-relaxed mb-3">
-              Discuss this project with your team. Messages are visible to all project members.
-            </p>
-            <div className="bg-neutral-900/50 border border-neutral-700/50 rounded-md p-3">
-              <div className="text-xs text-neutral-400 mb-1">Send emails to:</div>
-              <div className="flex items-center gap-2">
-                <code className="text-sm text-blue-400 font-mono">{projectEmail}</code>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(projectEmail);
-                    toast.success('Email copied to clipboard!');
-                  }}
-                  className="text-xs text-neutral-500 hover:text-white transition-colors"
-                >
-                  Copy
-                </button>
+      {/* Header Info (optional) */}
+      {showHeader && (
+        <div className="mb-6 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-6">
+          <div className="flex items-start gap-3 mb-4">
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+              <Mail className="w-6 h-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-base font-semibold text-white mb-1">
+                Connect your words to your work
+              </h3>
+              <p className="text-sm text-neutral-300 leading-relaxed mb-3">
+                Discuss this project with your team. Messages are visible to all project members.
+              </p>
+              <div className="bg-neutral-900/50 border border-neutral-700/50 rounded-md p-3">
+                <div className="text-xs text-neutral-400 mb-1">Send emails to:</div>
+                <div className="flex items-center gap-2">
+                  <code className="text-sm text-blue-400 font-mono">{projectEmail}</code>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(projectEmail);
+                      toast.success('Email copied to clipboard!');
+                    }}
+                    className="text-xs text-neutral-500 hover:text-white transition-colors"
+                  >
+                    Copy
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Messages Thread */}
       <div className="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden flex flex-col">
@@ -157,8 +161,10 @@ export default function MessagesView({ project }: MessagesViewProps) {
           {project.members && project.members.length > 0 ? (
             <>
               {project.members.slice(0, 5).map((member, index) => {
-                const memberUser = typeof member.user === 'object' ? member.user : null;
-                const memberName = memberUser?.name || 'Unknown';
+                // ProjectMember.user is typed as string in the service type; guard and coerce to any when needed
+                const rawUser = (member as any).user;
+                const memberUser = rawUser && typeof rawUser === 'object' ? (rawUser as any) : null;
+                const memberName = memberUser && memberUser.name ? memberUser.name : 'Unknown';
                 const initials = memberName
                   ?.split(' ')
                   .map(n => n[0])
