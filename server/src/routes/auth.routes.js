@@ -1,21 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const {
-  register,
-  login,
+  getDefaultSession,
   getMe,
   updateProfile,
   completeOnboarding,
 } = require('../controllers/auth.controller');
-const { protect } = require('../middleware/auth');
 
-// Public routes
-router.post('/register', register);
-router.post('/login', login);
-
-// Protected routes
-router.get('/me', protect, getMe);
-router.put('/profile', protect, updateProfile);
-router.post('/onboarding', protect, completeOnboarding);
+// All routes are public now
+router.get('/session', getDefaultSession);
+router.get('/me', getMe);
+router.put('/profile', updateProfile);
+router.post('/onboarding', completeOnboarding);
 
 module.exports = router;

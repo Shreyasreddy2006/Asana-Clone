@@ -1,16 +1,5 @@
 import api from '@/lib/axios';
 
-export interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-}
-
-export interface LoginData {
-  email: string;
-  password: string;
-}
-
 export interface User {
   _id: string;
   name: string;
@@ -21,76 +10,45 @@ export interface User {
   teams: string[];
   createdAt: string;
   onboarded?: boolean;
+  preferences?: any;
+  updatedAt?: string;
 }
 
-export interface AuthResponse {
-  success: boolean;
-  token: string;
-  user: User;
-}
+// Default user for the application
+const DEFAULT_USER: User = {
+  _id: '123456789',
+  name: 'Default User',
+  email: 'default@asanaclone.com',
+  avatar: null,
+  role: 'user',
+  workspaces: [],
+  teams: [],
+  preferences: {},
+  onboarded: false,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString()
+};
 
 export const authService = {
-  // Register new user
-  register: async (data: RegisterData): Promise<AuthResponse> => {
-    const response = await api.post('/auth/register', data);
-    // Transform server response to match AuthResponse interface
-    const { data: userData } = response.data;
-    return {
-      success: response.data.success,
-      token: userData.token,
-      user: {
-        _id: userData._id,
-        name: userData.name,
-        email: userData.email,
-        avatar: userData.avatar,
-        role: userData.role || 'user',
-        workspaces: userData.workspaces || [],
-        teams: userData.teams || [],
-        createdAt: userData.createdAt || new Date().toISOString(),
-        onboarded: userData.onboarded || false,
-      },
-    };
-  },
 
-  // Login user
-  login: async (data: LoginData): Promise<AuthResponse> => {
-    const response = await api.post('/auth/login', data);
-    // Transform server response to match AuthResponse interface
-    const { data: userData } = response.data;
-    return {
-      success: response.data.success,
-      token: userData.token,
-      user: {
-        _id: userData._id,
-        name: userData.name,
-        email: userData.email,
-        avatar: userData.avatar,
-        role: userData.role || 'user',
-        workspaces: userData.workspaces || [],
-        teams: userData.teams || [],
-        createdAt: userData.createdAt || new Date().toISOString(),
-        onboarded: userData.onboarded || false,
-      },
-    };
-  },
-
-  // Get current user
+  // Get current user (always returns default user)
   getMe: async (): Promise<{ success: boolean; user: User }> => {
-    const response = await api.get('/auth/me');
-    // Transform server response format { success, data } to { success, user }
     return {
-      success: response.data.success,
-      user: response.data.data,
+      success: true,
+      user: DEFAULT_USER,
     };
   },
 
-  // Update user profile
+  // Update user profile (updates default user in memory)
   updateProfile: async (data: Partial<User>): Promise<{ success: boolean; user: User }> => {
-    const response = await api.put('/auth/profile', data);
-    return response.data;
+    Object.assign(DEFAULT_USER, data);
+    return {
+      success: true,
+      user: DEFAULT_USER,
+    };
   },
 
-  // Complete onboarding
+  // Complete onboarding (updates default user's onboarded status)
   completeOnboarding: async (data: {
     role: string;
     workFunctions: string[];
@@ -102,13 +60,12 @@ export const authService = {
     layout: string;
     inviteEmails?: string[];
   }) => {
-    const response = await api.post('/auth/onboarding', data);
-    return response.data;
-  },
-
-  // Logout (client-side)
-  logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    DEFAULT_USER.onboarded = true;
+    return {
+      success: true,
+      data: {
+        user: DEFAULT_USER
+      }
+    };
   },
 };

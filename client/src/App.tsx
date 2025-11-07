@@ -32,129 +32,22 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route
-            path="/welcome"
-            element={
-              <ProtectedRoute>
-                <Welcome />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/onboarding"
-            element={
-              <ProtectedRoute>
-                <Onboarding />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/my-tasks"
-            element={
-              <ProtectedRoute>
-                <MyTasks />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/inbox"
-            element={
-              <ProtectedRoute>
-                <Inbox />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/reporting"
-            element={
-              <ProtectedRoute>
-                <Reporting />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/projects/:projectId"
-            element={
-              <ProtectedRoute>
-                <ProjectDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/goals"
-            element={
-              <ProtectedRoute>
-                <Goals />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/portfolios"
-            element={
-              <ProtectedRoute>
-                <Portfolios />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/portfolio-setup"
-            element={
-              <ProtectedRoute>
-                <PortfolioSetup />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/portfolio-detail"
-            element={
-              <ProtectedRoute>
-                <PortfolioDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard-detail"
-            element={
-              <ProtectedRoute>
-                <DashboardDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/workflow"
-            element={
-              <ProtectedRoute>
-                <Workflow />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/workflows"
-            element={
-              <ProtectedRoute>
-                <Workflow />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/workspace/*"
-            element={
-              <ProtectedRoute>
-                <Workspace />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/" element={<Navigate to="/onboarding" replace />} />
+          <Route path="/welcome" element={<Welcome />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/my-tasks" element={<MyTasks />} />
+          <Route path="/inbox" element={<Inbox />} />
+          <Route path="/reporting" element={<Reporting />} />
+          <Route path="/projects/:projectId" element={<ProjectDetail />} />
+          <Route path="/goals" element={<Goals />} />
+          <Route path="/portfolios" element={<Portfolios />} />
+          <Route path="/portfolio-setup" element={<PortfolioSetup />} />
+          <Route path="/portfolio-detail" element={<PortfolioDetail />} />
+          <Route path="/dashboard-detail" element={<DashboardDetail />} />
+          <Route path="/workflow" element={<Workflow />} />
+          <Route path="/workflows" element={<Workflow />} />
+          <Route path="/workspace/*" element={<Workspace />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
