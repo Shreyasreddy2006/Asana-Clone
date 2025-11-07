@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+package-lock.json
+.pnp/
+.pnp.js
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+*.tgz
+*.dmg
+*.tar.gz
+*.zip
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-*
+.DS_Store
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# MongoDB
+mongodb-*
+dump/
+
+# Large media files
+*.mp4
+*.mov
+*.wav
+*.zip
+*.tar.gz
