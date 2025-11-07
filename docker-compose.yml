@@ -9,47 +9,57 @@ services:
     container_name: asana-server
     restart: unless-stopped
     environment:
-      NODE_ENV: development
+      NODE_ENV: ${NODE_ENV:-development}
       PORT: 8765
       MONGODB_URI: ${MONGODB_ATLAS_URI:-mongodb+srv://your-username:your-password@your-cluster.mongodb.net/asana-clone?retryWrites=true&w=majority}
-      JWT_SECRET: your-super-secret-jwt-key-change-in-production
-      JWT_EXPIRE: 7d
-      CLIENT_URL: http://localhost:8080
-      EMAIL_HOST: smtp.ethereal.email
-      EMAIL_PORT: 587
-      EMAIL_USER: your-email@ethereal.email
-      EMAIL_PASSWORD: your-password
-      EMAIL_FROM: noreply@asanaclone.com
-      EMAIL_FROM_NAME: Asana Clone
-      REDIS_URL: redis://redis:6379
-      REDIS_ENABLED: "false"
+      JWT_SECRET: ${JWT_SECRET:-change-this-in-production}
+      JWT_EXPIRE: ${JWT_EXPIRE:-7d}
+      CLIENT_URL: ${CLIENT_URL:-http://localhost:8080}
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.ethereal.email}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@asanaclone.com}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-Asana Clone}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      REDIS_ENABLED: ${REDIS_ENABLED:-false}
     ports:
-      - "8765:8765"
+      - "${SERVER_PORT:-8765}:8765"
     volumes:
-      - ./server/uploads:/app/uploads
+      - ./server/uploads:/app/uploads:rw
+      - /app/node_modules # Anonymous volume for node_modules
     networks:
       - asana-network
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8765/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
       timeout: 3s
       retries: 3
       start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 500M
+        reservations:
+          cpus: '0.25'
+          memory: 200M
 
   # Frontend Client
   client:
     build:
       context: ./client
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8765/api}
+        VITE_SOCKET_URL: ${VITE_SOCKET_URL:-http://localhost:8765}
     container_name: asana-client
     restart: unless-stopped
-    environment:
-      VITE_API_URL: http://localhost:8765/api
-      VITE_SOCKET_URL: http://localhost:8765
     ports:
-      - "8080:80"
+      - "${CLIENT_PORT:-8080}:80"
     depends_on:
-      - server
+      server:
+        condition: service_healthy
     networks:
       - asana-network
     healthcheck:
@@ -58,7 +68,16 @@ services:
       timeout: 3s
       retries: 3
       start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 300M
+        reservations:
+          cpus: '0.1'
+          memory: 100M
 
 networks:
   asana-network:
     driver: bridge
+    name: asana_network
