@@ -1,111 +1,33 @@
 const User = require('../models/User');
 const Workspace = require('../models/Workspace');
-const { generateToken } = require('../middleware/auth');
 const { logActivity } = require('../utils/notifications');
 
-// @desc    Register user
-// @route   POST /api/auth/register
-// @access  Public
-const register = async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
-
-    // Check if user exists
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({
-        success: false,
-        message: 'User already exists',
-      });
-    }
-
-    // Create user
-    const user = await User.create({
-      name,
-      email,
-      password,
-    });
-
-    // Generate token
-    const token = generateToken(user._id);
-
-    res.status(201).json({
-      success: true,
-      data: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-        role: user.role,
-        workspaces: user.workspaces,
-        teams: user.teams,
-        preferences: user.preferences,
-        onboarded: user.onboarded,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        token,
-      },
-    });
-  } catch (error) {
-    console.error('Register error:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Server error',
-    });
-  }
+// Default user for the application (no authentication needed)
+const DEFAULT_USER = {
+  _id: '123456789',
+  name: 'Default User',
+  email: 'default@asanaclone.com',
+  avatar: null,
+  role: 'user',
+  workspaces: [],
+  teams: [],
+  preferences: {},
+  onboarded: false,
+  createdAt: new Date(),
+  updatedAt: new Date()
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
+// @desc    Get default user (replaces register/login)
+// @route   GET /api/auth/session
 // @access  Public
-const login = async (req, res) => {
+const getDefaultSession = async (req, res) => {
   try {
-    const { email, password } = req.body;
-
-    // Check for user
-    const user = await User.findOne({ email }).select('+password');
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials',
-      });
-    }
-
-    // Check password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials',
-      });
-    }
-
-    // Update last active
-    user.lastActive = new Date();
-    await user.save();
-
-    // Generate token
-    const token = generateToken(user._id);
-
     res.json({
       success: true,
-      data: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar,
-        role: user.role,
-        workspaces: user.workspaces,
-        teams: user.teams,
-        preferences: user.preferences,
-        onboarded: user.onboarded,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        token,
-      },
+      data: DEFAULT_USER
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Session error:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Server error',
@@ -115,16 +37,12 @@ const login = async (req, res) => {
 
 // @desc    Get current user
 // @route   GET /api/auth/me
-// @access  Private
+// @access  Public
 const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id)
-      .populate('workspaces', 'name description')
-      .populate('teams', 'name description');
-
     res.json({
       success: true,
-      data: user,
+      data: DEFAULT_USER,
     });
   } catch (error) {
     console.error('Get me error:', error);
@@ -170,28 +88,27 @@ const updateProfile = async (req, res) => {
 
 // @desc    Complete onboarding
 // @route   POST /api/auth/onboarding
-// @access  Private
+// @access  Public
 const completeOnboarding = async (req, res) => {
   try {
     const { workspaceName, workspaceDescription } = req.body;
 
     // Create default workspace
     const workspace = await Workspace.create({
-      name: workspaceName || `${req.user.name}'s Workspace`,
+      name: workspaceName || `${DEFAULT_USER.name}'s Workspace`,
       description: workspaceDescription || '',
-      owner: req.user._id,
+      owner: DEFAULT_USER._id,
       members: [
         {
-          user: req.user._id,
+          user: DEFAULT_USER._id,
           role: 'owner',
         },
       ],
     });
 
-    // Update user
-    req.user.workspaces.push(workspace._id);
-    req.user.onboarded = true;
-    await req.user.save();
+    // Update default user
+    DEFAULT_USER.workspaces.push(workspace._id);
+    DEFAULT_USER.onboarded = true;
 
     // Log activity
     await logActivity({
@@ -222,8 +139,7 @@ const completeOnboarding = async (req, res) => {
 };
 
 module.exports = {
-  register,
-  login,
+  getDefaultSession,
   getMe,
   updateProfile,
   completeOnboarding,
